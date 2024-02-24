@@ -9,9 +9,6 @@ type Position* = object
     us*: Color
     halfmoveClock*, halfmovesPlayed*: int
 
-func enemy*(position: Position): Color =
-    position.us.opposite
-
 func `[]`*(position: Position, color: Color): Bitboard {.inline.} =
     position.pieces[color]
 
@@ -36,4 +33,10 @@ func removePiece*(position: var Position, color: Color, source: Square) {.inline
 func movePiece*(position: var Position, color: Color, source, target: Square) {.inline.} =
     position.removePiece(color, source)
     position.addPiece(color, target)
+
+func enemy*(position: Position): Color =
+    position.us.opposite
+
+func occupancy*(position: Position): Bitboard =
+    position[red] or position[blue] or position[blocked]
 
