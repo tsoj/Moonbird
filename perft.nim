@@ -14,8 +14,7 @@ func perft*(position: Position, depth: int, printRootMoveNodes = false): int64 =
     position.halfmoveClock >= 100 or (position.moves() == @[nullMove] and position.doMove(nullMove).moves() == @[nullMove]):
         return 0
 
-    let moves = position.moves()
-    for move in moves:
+    for move in position.moves():
         let
             newPosition = position.doMove(move)
             nodes = newPosition.perft(depth - 1)
@@ -49,6 +48,8 @@ const perftPositions = [
     ("x5o/7/7/7/7/7/o5x o 100 1", @[1, 0, 0, 0, 0]),
     ("7/7/7/7/-------/-------/x5o x 0 1", @[1, 2, 4, 13, 30, 73, 174]),
     ("7/7/7/7/-------/-------/x5o o 0 1", @[1, 2, 4, 13, 30, 73, 174]),
+    ("xxxxxxx/-------/-------/o6/7/7/7 x 0 1", @[1, 1, 8, 8, 127, 127, 2626, 2626]),
+    ("xxxxxxx/ooooooo/ooooooo/7/7/7/7 x 0 1", @[1, 1, 75, 249, 14270, 452980]),
 ]
 
 for (fen, targetNodes) in perftPositions:
