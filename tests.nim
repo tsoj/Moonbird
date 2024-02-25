@@ -98,11 +98,11 @@ proc testZobristKeys(): Option[string] =
                 p2 = fen2.toPosition
             p1.halfmoveClock = p2.halfmoveClock
             p1.halfmovesPlayed = p2.halfmovesPlayed
-            if p1.fen != p1.fen and p1.zobristKey == p2.zobristKey:
+            if p1.fen != p2.fen and p1.zobristKey == p2.zobristKey:
                 return some &"Zobrist key for both \"{fen1}\" and \"{fen2}\" is the same ({fen1.toPosition.zobristKey})"
 
+proc runTests*(): bool =
 
-when isMainModule:
     const tests = [
         (testFen, "FEN parsing"),
         (testPerft, "Move generation"),
@@ -123,8 +123,16 @@ when isMainModule:
 
     if failedTests == 0:
         styledEcho fgGreen, styleBright, "Finished all tests successfully"
+        true
     else:
         styledEcho fgRed, styleBright, fmt"Failed {failedTests} of {tests.len} tests"
+        false
+
+
+when isMainModule:
+
+    if not runTests():
+        quit(QuitFailure)
         
 
 

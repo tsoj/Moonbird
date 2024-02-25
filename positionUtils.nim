@@ -88,7 +88,7 @@ proc toPosition*(fen: string, suppressWarnings = false): Position =
             doAssert pieceChar notin ['2', '3', '4', '5', '6', '7']
             try:
                 let sq = squareList.pop
-                result.addPiece(pieceChar.parseColor, sq)
+                result.addPiece(pieceChar.toColor, sq)
             except ValueError:
                 raise newException(ValueError, "FEN piece placement is not correctly formatted: " &
                         getCurrentExceptionMsg())
@@ -116,25 +116,4 @@ proc toPosition*(fen: string, suppressWarnings = false): Position =
     except ValueError:
         raise newException(ValueError, "FEN fullmove number is not correctly formatted: " & getCurrentExceptionMsg())
 
-
-# const fens = [
-#     "x5o/7/7/7/7/7/o5x x 0 1",
-#     "x5o/7/2-1-2/7/2-1-2/7/o5x x 0 1",
-#     "x5o/7/3-3/2-1-2/3-3/7/o5x x 0 1",
-#     "7/7/7/7/7/7/7 x 0 1",
-#     "7/7/7/7/7/7/7 o 0 1",
-#     "7/7/7/7/7/7/7 x 100 1",
-#     "7/7/7/7/7/7/7 o 100 1",
-#     "7/7/7/7/7/7/7 x 0 100",
-#     "7/7/7/7/7/7/7 o 0 100",
-#     "7/7/7/7/7/7/7 x 100 200",
-#     "7/7/7/7/7/7/7 o 100 200",
-#     "x5o/7/7/7/7/7/o5x x", 
-#     "x5o/7/7/7/7/7/o5x x 0",
-#     "x5o/7/2-1-2/7/2-1-2/7/o5x x", 
-#     "x5o/7/2-1-2/7/2-1-2/7/o5x x 0"
-# ]
-
-# for fen in fens:
-#     echo fen.toPosition
-#     echo fen.toPosition.fen
+const startpos* = "x5o/7/7/7/7/7/o5x x 0 1".toPosition

@@ -67,10 +67,10 @@ func opposite*(color: Color): Color =
     (color.uint8 xor 1).Color
 
 
-func parseSquare*(s: string): Square =
+func toSquare*(s: string): Square =
     parseEnum[Square](s)
 
-func parseColor*(s: string or char): Color =
+func toColor*(s: string or char): Color =
     case ($s).toLowerAscii.strip:
     of "x", "b", "blue", "black":
         blue
