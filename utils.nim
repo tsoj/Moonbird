@@ -25,9 +25,6 @@ func boardString*(f: proc(square: Square): Option[string] {.noSideEffect.}): str
         result &= "|" & intToStr(rank + 1) & "\n"
     result &= " A B C D E F G"
 
-func clampToType*[In, Out](x: In, OutType: typedesc[Out]): Out =
-    x.clamp(OutType.low.In, OutType.high.In).Out
-
 proc getCpuInfo*(): string =
     when defined(posix):
         var cpuName = execCmdEx("""

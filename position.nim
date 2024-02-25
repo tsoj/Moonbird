@@ -40,3 +40,4 @@ func enemy*(position: Position): Color =
 func occupancy*(position: Position): Bitboard =
     position[red] or position[blue] or position[blocked]
 
+

@@ -14,6 +14,12 @@ type
         noSquare
     Color* = enum
         red, blue, blocked, noColor
+    Value* = int32
+    Ply* = distinct uint8
+    NodeType* = enum
+        pvNode,
+        allNode,
+        cutNode
     
 
 template isLeftEdge*(square: Square): bool =
@@ -76,3 +82,34 @@ func parseColor*(s: string or char): Color =
         noColor
     else:
         raise newException(ValueError, "Unrecognized color string: \"" & s & "\"")
+
+func clampToType*[In, Out](x: In, OutType: typedesc[Out]): Out =
+    x.clamp(OutType.low.In, OutType.high.In).Out
+
+func `-`*(a: Ply, b: SomeNumber or Ply): Ply =
+    clampToType(a.BiggestInt - b.BiggestInt, Ply)
+func `-`*(a: SomeNumber, b: Ply): Ply =
+    clampToType(a.BiggestInt - b.BiggestInt, Ply)
+
+func `+`*(a: Ply, b: SomeNumber or Ply): Ply =
+    clampToType(a.BiggestInt + b.BiggestInt, Ply)
+func `+`*(a: SomeNumber, b: Ply): Ply =
+    clampToType(a.BiggestInt + b.BiggestInt, Ply)
+
+func `-=`*(a: var Ply, b: Ply or SomeNumber) =
+    a = a - b
+func `+=`*(a: var Ply, b: Ply or SomeNumber) =
+    a = a + b
+
+func `==`*(a, b: Ply): bool {.borrow.}
+func `<=`*(a, b: Ply): bool {.borrow.}
+func `<`*(a, b: Ply): bool {.borrow.}
+
+const valueInfinity* = min(-(int16.low.Value), int16.high.Value)
+static: doAssert -valueInfinity <= valueInfinity
+const baseValueWin = valueInfinity - Ply.high.Value - 1.Value
+
+func valueWin*(height: Ply): Value =
+    baseValueWin + (Ply.high - height).Value
+static: doAssert Ply.low.valueWin < valueInfinity
+static: doAssert Ply.high.valueWin >= baseValueWin
