@@ -1,6 +1,7 @@
 import
     positionUtils,
-    perft
+    perft,
+    zobrist
 
 import std/[
     strformat,
@@ -8,27 +9,49 @@ import std/[
     options
 ]
 
+const someFens = [
+    "x5o/7/7/7/7/7/o5x x 0 1",
+    "x5o/7/2-1-2/7/2-1-2/7/o5x x 0 1",
+    "x5o/7/3-3/2-1-2/3-3/7/o5x x 0 1",
+    "7/7/7/7/7/7/7 x 0 1",
+    "7/7/7/7/7/7/7 o 0 1",
+    "7/7/7/7/7/7/7 x 100 1",
+    "7/7/7/7/7/7/7 o 100 1",
+    "7/7/7/7/7/7/7 x 0 100",
+    "7/7/7/7/7/7/7 o 0 100",
+    "7/7/7/7/7/7/7 x 100 200",
+    "7/7/7/7/7/7/7 o 100 200",
+    "x5o/7/7/7/7/7/o5x x", 
+    "x5o/7/7/7/7/7/o5x x 0",
+    "x5o/7/2-1-2/7/2-1-2/7/o5x x", 
+    "x5o/7/2-1-2/7/2-1-2/7/o5x x 0",
+    "7/7/7/7/7/7/7 x 0 1",
+    "7/7/7/7/7/7/7 o 0 1",
+    "x5o/7/7/7/7/7/o5x x 0 1", 
+    "x5o/7/7/7/7/7/o5x o 0 1", 
+    "x5o/7/2-1-2/7/2-1-2/7/o5x x 0 1",
+    "x5o/7/2-1-2/7/2-1-2/7/o5x o 0 1",
+    "x5o/7/2-1-2/3-3/2-1-2/7/o5x x 0 1",
+    "x5o/7/2-1-2/3-3/2-1-2/7/o5x o 0 1",
+    "x5o/7/3-3/2-1-2/3-3/7/o5x x 0 1",
+    "x5o/7/3-3/2-1-2/3-3/7/o5x o 0 1",
+    "7/7/7/7/ooooooo/ooooooo/xxxxxxx x 0 1", 
+    "7/7/7/7/ooooooo/ooooooo/xxxxxxx o 0 1", 
+    "7/7/7/7/xxxxxxx/xxxxxxx/ooooooo x 0 1", 
+    "7/7/7/7/xxxxxxx/xxxxxxx/ooooooo o 0 1", 
+    "7/7/7/2x1o2/7/7/7 x 0 1",
+    "7/7/7/2x1o2/7/7/7 o 0 1",
+    "x5o/7/7/7/7/7/o5x x 100 1",
+    "x5o/7/7/7/7/7/o5x o 100 1",
+    "7/7/7/7/-------/-------/x5o x 0 1",
+    "7/7/7/7/-------/-------/x5o o 0 1",
+    "xxxxxxx/-------/-------/o6/7/7/7 x 0 1",
+    "xxxxxxx/ooooooo/ooooooo/7/7/7/7 x 0 1", 
+]
 
 proc testFen(): Option[string] =
-    const fens = [
-        "x5o/7/7/7/7/7/o5x x 0 1",
-        "x5o/7/2-1-2/7/2-1-2/7/o5x x 0 1",
-        "x5o/7/3-3/2-1-2/3-3/7/o5x x 0 1",
-        "7/7/7/7/7/7/7 x 0 1",
-        "7/7/7/7/7/7/7 o 0 1",
-        "7/7/7/7/7/7/7 x 100 1",
-        "7/7/7/7/7/7/7 o 100 1",
-        "7/7/7/7/7/7/7 x 0 100",
-        "7/7/7/7/7/7/7 o 0 100",
-        "7/7/7/7/7/7/7 x 100 200",
-        "7/7/7/7/7/7/7 o 100 200",
-        "x5o/7/7/7/7/7/o5x x", 
-        "x5o/7/7/7/7/7/o5x x 0",
-        "x5o/7/2-1-2/7/2-1-2/7/o5x x", 
-        "x5o/7/2-1-2/7/2-1-2/7/o5x x 0"
-    ]
 
-    for fen in fens:
+    for fen in someFens:
         if fen != fen.toPosition.fen[0..<fen.len]:
             return some fmt"{fen} != {fen.toPosition.fen}"
 
@@ -66,10 +89,24 @@ proc testPerft(): Option[string] =
             if nodesTarget != nodes:
                 return some &"Perft to depth {i} for \"{fen}\" should be {nodesTarget} but is {nodes}"
 
+
+proc testZobristKeys(): Option[string] =
+    for fen1 in someFens:
+        for fen2 in someFens:
+            var
+                p1 = fen1.toPosition
+                p2 = fen2.toPosition
+            p1.halfmoveClock = p2.halfmoveClock
+            p1.halfmovesPlayed = p2.halfmovesPlayed
+            if p1.fen != p1.fen and p1.zobristKey == p2.zobristKey:
+                return some &"Zobrist key for both \"{fen1}\" and \"{fen2}\" is the same ({fen1.toPosition.zobristKey})"
+
+
 when isMainModule:
     const tests = [
         (testFen, "FEN parsing"),
-        (testPerft, "Move generation")
+        (testPerft, "Move generation"),
+        (testZobristKeys, "Zobrist key calculation")
     ]
 
     var failedTests = 0
