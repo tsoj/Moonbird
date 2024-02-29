@@ -35,9 +35,10 @@ func doMove*(position: Position, move: Move): Position =
     if move != nullMove:
         assert source != noSquare and target != noSquare
         
-        if (source.attack(2) and target.toBitboard) != 0:
+        if move.isDouble:
             result.movePiece(us, source, target)
         else:
+            assert move.isSingle
             result.addPiece(us, target)
             result.halfmoveClock = 0
 
@@ -45,3 +46,25 @@ func doMove*(position: Position, move: Move): Position =
         result[enemy] &= not target.mask(1)
 
     result.us = enemy
+
+func pieceDelta*(move: Move, position: Position): int =
+
+    if move == nullMove: return 0
+
+    assert move != noMove
+    assert (position[position.us] and move.source.toBitboard) != 0, "This function should be used on the position before the move"
+    
+    if move.isSingle:
+        result += 1
+
+    result += 2 * countSetBits(position[position.enemy] and move.target.mask(1))
+
+func isLegal*(move: Move, position: Position): bool =
+    if move == noMove: false
+    elif move == nullMove: true
+    else:
+        move.source != noSquare and move.target != noSquare and
+        (position[position.us] and move.source.toBitboard) != 0 and
+        (position.occupancy and move.target.toBitboard) == 0 and
+        (move.target.toBitboard and (move.source.attack(1) or move.source.attack(2))) != 0
+

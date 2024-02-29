@@ -3,7 +3,8 @@ import
     position,
     positionUtils,
     move,
-    movegen
+    movegen,
+    moveIterator
 
 func perft*(position: Position, depth: int, printRootMoveNodes = false): int64 =
 
@@ -14,7 +15,7 @@ func perft*(position: Position, depth: int, printRootMoveNodes = false): int64 =
     position.halfmoveClock >= 100 or (position.moves() == @[nullMove] and position.doMove(nullMove).moves() == @[nullMove]):
         return 0
 
-    for move in position.moves():
+    for move in position.moveIterator():
         let
             newPosition = position.doMove(move)
             nodes = newPosition.perft(depth - 1)

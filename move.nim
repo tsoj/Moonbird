@@ -1,4 +1,6 @@
-import types
+import
+    types,
+    bitboard
 
 export types
 
@@ -19,3 +21,9 @@ func toMove*(s: string): Move =
     if s.len != 4:
         raise newException(ValueError, "Unrecognized move string: \"" & s & "\"")
     Move(source: s[0..1].toSquare, target: s[2..3].toSquare)
+
+func isDouble*(move: Move): bool =
+    (move.source.attack(2) and move.target.toBitboard) != 0
+
+func isSingle*(move: Move): bool =
+    (move.source.attack(1) and move.target.toBitboard) != 0
