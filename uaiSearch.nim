@@ -46,7 +46,7 @@ proc uaiSearch*(searchInfo: SearchInfo) =
             value = value,
             nodes = nodes,
             pv = pv,
-            time= p assedTime,
+            time = passedTime,
             hashFull = searchInfo.hashTable[].hashFull
         )
 

@@ -3,7 +3,7 @@ import
     move,
     position,
     hashTable,
-    # rootSearch,
+    rootSearch,
     # evaluation,
     utils
 
@@ -63,18 +63,12 @@ iterator iterativeTimeManagedSearch*(searchInfo: SearchInfo): tuple[pv: seq[Move
         lastNumNodes = int64.high
 
     for (pv, value, nodes) in iterativeDeepeningSearch(
-        position,
-        hashTable,
-        stop,
-        positionHistory,
-        targetDepth,
-        numThreads = if calculatedMoveTime.approxTime <= 0.1.Seconds: 1 else: numThreads,
-        maxNodes = maxNodes,
-        stopTime = start + calculatedMoveTime.maxTime,
-        multiPv = multiPv,
-        searchMoves = searchMoves,
-        evaluation = evaluation,
-        requireRootPv = requireRootPv
+        position = searchInfo.position,
+        hashTable = searchInfo.hashTable[],
+        positionHistory = searchInfo.positionHistory,
+        targetDepth = searchInfo.targetDepth,
+        maxNodes = searchInfo.nodes,
+        stopTime = start + calculatedMoveTime.maxTime
     ):
         let
             totalPassedTime = secondsSince1970() - start
@@ -96,13 +90,8 @@ iterator iterativeTimeManagedSearch*(searchInfo: SearchInfo): tuple[pv: seq[Move
 
         let estimatedTimeNextIteration = iterationPassedTime * averageBranchingFactor
         if estimatedTimeNextIteration + totalPassedTime > calculatedMoveTime.approxTime:
-            break;
-
-        if timeLeft[us] < Seconds.high:
             break
 
-    stop[].store(true)
-
-proc timeManagedSearch*(searchInfo: SearchInfo): tuple[pv: seq[PMove], value: Value] =
+proc timeManagedSearch*(searchInfo: SearchInfo): tuple[pv: seq[Move], value: Value] =
     for (pv, value, nodes, passedTime) in searchInfo.iterativeTimeManagedSearch():
         result = (pv: pv, value: value)

@@ -9,31 +9,32 @@ import
     hashTable,
     evaluation,
     utils,
-    see,
-    searchParams
+    searchParams,
+    zobrist,
+    movegen
 
 import std/[
     atomics,
     options
 ]
 
-static: doAssert pawn.value == 100.cp
+# static: doAssert pawn.value == 100.cp
 
-func futilityReduction(value: Value): Ply =
-    clampToType(value.toCp div futilityReductionDiv(), Ply)
+# func futilityReduction(value: Value): Ply =
+#     clampToType(value.toCp div futilityReductionDiv(), Ply)
 
-func hashResultFutilityMargin(depthDifference: Ply): Value =
-    depthDifference.Value * hashResultFutilityMarginMul().cp
+# func hashResultFutilityMargin(depthDifference: Ply): Value =
+#     depthDifference.Value * hashResultFutilityMarginMul().cp
 
-func nullMoveDepth(depth: Ply): Ply =
-    depth - nullMoveDepthSub() - depth div nullMoveDepthDiv().Ply
+# func nullMoveDepth(depth: Ply): Ply =
+#     depth - nullMoveDepthSub() - depth div nullMoveDepthDiv().Ply
 
-func lmrDepth(depth: Ply, lmrMoveCounter: int): Ply =
-    let halfLife = lmrDepthHalfLife()
-    result = ((depth.int * halfLife) div (halfLife + lmrMoveCounter)).Ply - lmrDepthSub()
+# func lmrDepth(depth: Ply, lmrMoveCounter: int): Ply =
+#     let halfLife = lmrDepthHalfLife()
+#     result = ((depth.int * halfLife) div (halfLife + lmrMoveCounter)).Ply - lmrDepthSub()
 
 type SearchState* = object
-    stop: bool
+    stop*: bool
     hashTable*: ptr HashTable
     # killerTable*: KillerTable
     # historyTable*: HistoryTable
@@ -42,7 +43,7 @@ type SearchState* = object
     maxNodes*: int64
     stopTime*: Seconds
 
-func shouldStop(state: SearchState): bool =
+func shouldStop(state: var SearchState): bool =
     if state.countedNodes >= state.maxNodes or
     ((state.countedNodes mod 1998) == 1107 and secondsSince1970() >= state.stopTime):
         state.stop = true
@@ -67,17 +68,13 @@ func search(
     position: Position,
     state: var SearchState,
     alpha, beta: Value,
-    depth, height: Ply,
-    previous: Move
+    depth, height: Ply
 ): Value =
     assert alpha < beta
 
     state.countedNodes += 1
 
-    if (
-        height == Ply.high or state.repetition.addAndCheck(position, height) or
-        position.halfmoveClock >= 100
-    ) and height > 0:
+    if (height == Ply.high or position.halfmoveClock >= 100) and height > 0.Ply:
         return 0.Value
     
     let
@@ -90,43 +87,13 @@ func search(
         bestMove = noMove
         bestValue = -valueInfinity
 
-    if depth <= 0:
+    if depth <= 0.Ply or state.repetition.addAndCheckForRepetition(position, height):
         return position.evaluate
 
     # iterate over all moves and recursively search the new positions
-    for move in position.treeSearchMoveIterator(hashResult.bestMove):
-
-        if height == 0.Ply and move in state.skipMovesAtRoot:
-            continue
+    for move in position.moveIterator(hashResult.bestMove):
 
         let newPosition = position.doMove(move)
-        if newPosition.inCheck(us):
-            continue
-        moveCounter += 1
-
-        let givingCheck = newPosition.inCheck(newPosition.us)
-
-        var
-            newDepth = depth
-            newBeta = beta
-
-        if not givingCheck:
-
-            # late move reduction
-            if moveCounter >= minMoveCounterLmr() and not move.isTactical:
-                newDepth = lmrDepth(newDepth, lmrMoveCounter)
-                lmrMoveCounter += 1
-
-            # futility reduction
-            if moveCounter >= minMoveCounterFutility() and newDepth > 0:
-                newDepth -= futilityReduction(alpha - staticEval - position.see(move))
-            
-            if newDepth <= 0:
-                continue
-
-        # first explore with null window
-        if hashResult.isEmpty or hashResult.bestMove != move or hashResult.nodeType == allNode:
-            newBeta = alpha + 1
 
         # stop search if we exceeded maximum nodes or we got a stop signal from outside
         if state.shouldStop:
@@ -135,20 +102,9 @@ func search(
         # search new position
         var value = -newPosition.search(
             state,
-            alpha = -newBeta, beta = -alpha,
-            depth = newDepth - 1.Ply, height = height + 1.Ply,
-            previous = move
+            alpha = -beta, beta = -alpha,
+            depth = depth - 1.Ply, height = height + 1.Ply
         )
-
-        # re-search with full window and full depth
-        if value > alpha and (newDepth < depth or newBeta < beta):
-            newDepth = depth
-            value = -newPosition.search(
-                state,
-                alpha = -beta, beta = -alpha,
-                depth = depth - 1.Ply, height = height + 1.Ply,
-                previous = move
-            )
 
         if value > bestValue:
             bestValue = value
@@ -161,18 +117,8 @@ func search(
         if value > alpha:
             nodeType = pvNode
             alpha = value
-        else:
-            state.historyTable.update(move, previous = previous, us, newDepth, raisedAlpha = false)
-
-    if moveCounter == 0:
-        # checkmate
-        if inCheck:
-            bestValue = -(height.checkmateValue)
-        # stalemate
-        else:
-            bestValue = 0.Value
     
-    state.update(position, bestMove, previous = previous, depth = depth, height = height, nodeType, bestValue)
+    state.update(position, bestMove, depth = depth, height = height, nodeType, bestValue)
 
     bestValue
 
@@ -180,33 +126,13 @@ func search*(
     position: Position,
     state: var SearchState,
     depth: Ply
-): Value =
+) =
 
-    let hashResult = state.hashTable[].get(position.zobristKey)
+    state.stop = false
+    state.countedNodes = 0
 
-    var
-        estimatedValue = (if hashResult.isEmpty: 0.Value else: hashResult.value).float
-        alphaOffset = aspirationWindowStartingOffset().cp.float
-        betaOffset = aspirationWindowStartingOffset().cp.float
-
-    # growing alpha beta window
-    while not state.shouldStop:
-        let
-            alpha = max(estimatedValue - alphaOffset, -valueInfinity.float).Value
-            beta = min(estimatedValue + betaOffset, valueInfinity.float).Value
-
-        result = position.search(
-            state,
-            alpha = alpha, beta = beta,
-            depth = depth, height = 0,
-            previous = noMove
-        )
-        doAssert result.abs <= valueInfinity
-
-        estimatedValue = result.float
-        if result <= alpha:
-            alphaOffset *= aspirationWindowMultiplier()
-        elif result >= beta:
-            betaOffset *= aspirationWindowMultiplier()
-        else:
-            break
+    discard position.search(
+        state,
+        alpha = -valueInfinity, beta = valueInfinity,
+        depth = depth, height = 0.Ply
+    )

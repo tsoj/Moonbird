@@ -6,7 +6,8 @@ import
     zobrist
 
 import std/[
-    math
+    math,
+    sets
 ]
 
 #-------------- repetition detection --------------#
@@ -16,18 +17,18 @@ type Repetition* = object
     dynamicHistory: array[Ply, ZobristKey]
 
 
-func add(r: var Repetition, key: ZobristKey) =
+func add*(r: var Repetition, key: ZobristKey) =
     r.staticHistory.incl key
 
-func addAndCheckForRepetition(r: var Repetition, position: Position, height: Ply): bool =
+func addAndCheckForRepetition*(r: var Repetition, position: Position, height: Ply): bool =
     let key = position.zobristKey
     r.dynamicHistory[height] = key
-    key in r.staticHistory or key in r.dynamicHistory[max(0, height - position.halfmoveClock)..<height]
+    key in r.staticHistory or key in r.dynamicHistory[max(0.Ply, height - position.halfmoveClock)..<height]
 
-func newRepetition*(staticHistory: seq[Position]): Repetition =
+func newRepetition*(staticHistory: openArray[Position]): Repetition =
     for position in staticHistory:
         result.staticHistory.incl position.zobristKey
 
-func update*(gameHistory: var GameHistory, position: Position, height: Ply) =
-    gameHistory.dynamicHistory[height] = position.zobristKey
+func update*(repetition: var Repetition, position: Position, height: Ply) =
+    repetition.dynamicHistory[height] = position.zobristKey
 

@@ -15,7 +15,7 @@ type
     Color* = enum
         red, blue, blocked, noColor
     Value* = int32
-    Ply* = distinct uint8
+    Ply* = 0.int8 .. int8.high
     NodeType* = enum
         pvNode,
         allNode,
@@ -100,10 +100,6 @@ func `-=`*(a: var Ply, b: Ply or SomeNumber) =
     a = a - b
 func `+=`*(a: var Ply, b: Ply or SomeNumber) =
     a = a + b
-
-func `==`*(a, b: Ply): bool {.borrow.}
-func `<=`*(a, b: Ply): bool {.borrow.}
-func `<`*(a, b: Ply): bool {.borrow.}
 
 const valueInfinity* = min(-(int16.low.Value), int16.high.Value)
 static: doAssert -valueInfinity <= valueInfinity
