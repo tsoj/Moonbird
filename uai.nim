@@ -27,7 +27,7 @@ type UaiState = object
     hashTable: HashTable
 
 proc uai(uaiState: var UaiState) =
-    echo "id name TODO " & versionOrId()
+    echo "id name Moonbird " & versionOrId()
     echo "id author Jost Triller"
     echo "option name Hash type spin default ", defaultHashSizeMB, " min 1 max ", maxHashSizeMB
     printUaiSearchParams()
@@ -207,6 +207,9 @@ proc uaiLoop*() =
                 except CatchableError:
                     echo "Unknown command: ", params[0]
                     echo "Use 'help'"
+        except EOFError:
+            echo "Quitting because of reaching end of file"
+            break
         except CatchableError:
             echo "Error: ", getCurrentExceptionMsg()
 
