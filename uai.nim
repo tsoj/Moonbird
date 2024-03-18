@@ -164,8 +164,6 @@ proc perft(uaiState: UaiState, params: seq[string]) =
 
 proc uaiLoop*() =
 
-    # printLogo() # TODO
-
     var uaiState = UaiState(
         position: startpos,
         hashtable: newHashTable()

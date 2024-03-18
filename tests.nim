@@ -1,7 +1,8 @@
 import
     positionUtils,
     perft,
-    zobrist
+    zobrist,
+    version
 
 import std/[
     strformat,
@@ -130,6 +131,8 @@ proc runTests*(): bool =
 
 
 when isMainModule:
+
+    echo "Version ", versionOrId()
 
     if not runTests():
         quit(QuitFailure)
