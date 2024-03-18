@@ -54,5 +54,5 @@ proc uaiSearch*(searchInfo: SearchInfo) =
             bestMove = pv[0]
         iteration += 1
 
-    echo bestMove
+    echo "bestmove ", bestMove
 
