@@ -79,3 +79,9 @@ func mask*(square: Square, size: 0..6): Bitboard =
 
 func attack*(square: Square, size: 1..6): Bitboard =
     attacks[size][square]
+
+func singles*(square: Square): Bitboard =
+    square.attack(1)
+
+func doubles*(square: Square): Bitboard =
+    square.attack(2)

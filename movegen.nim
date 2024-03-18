@@ -10,10 +10,10 @@ func moves*(position: Position): seq[Move] =
     var doneTargets = 0.Bitboard
 
     for source in position[position.us]:
-        for target in source.attack(2) and not position.occupancy:
+        for target in source.doubles and not position.occupancy:
             result.add Move(source: source, target: target)
         
-        for target in source.attack(1) and not (position.occupancy or doneTargets):
+        for target in source.singles and not (position.occupancy or doneTargets):
             result.add Move(source: source, target: target)
             doneTargets |= target.toBitboard
     
@@ -66,5 +66,5 @@ func isLegal*(move: Move, position: Position): bool =
         move.source != noSquare and move.target != noSquare and
         (position[position.us] and move.source.toBitboard) != 0 and
         (position.occupancy and move.target.toBitboard) == 0 and
-        (move.target.toBitboard and (move.source.attack(1) or move.source.attack(2))) != 0
+        (move.target.toBitboard and (move.source.singles or move.source.doubles)) != 0
 

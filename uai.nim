@@ -212,5 +212,3 @@ proc uaiLoop*() =
             break
         except CatchableError:
             echo "Error: ", getCurrentExceptionMsg()
-
-uaiLoop()
