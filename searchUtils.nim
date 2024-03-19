@@ -2,8 +2,7 @@ import
     types,
     move,
     position,
-    searchParams,
-    zobrist
+    searchParams
 
 import std/[
     math,
@@ -15,10 +14,6 @@ import std/[
 type Repetition* = object
     staticHistory: HashSet[ZobristKey]
     dynamicHistory: array[Ply, ZobristKey]
-
-
-func add*(r: var Repetition, key: ZobristKey) =
-    r.staticHistory.incl key
 
 func addAndCheckForRepetition*(r: var Repetition, position: Position, height: Ply): bool =
     let key = position.zobristKey

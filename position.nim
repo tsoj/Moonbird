@@ -2,12 +2,17 @@ import
     types,
     bitboard
 
+import std/[
+    random
+]
+
 export types, bitboard
 
 type Position* = object
     pieces: array[red..blocked, Bitboard]
     us*: Color
     halfmoveClock*, halfmovesPlayed*: int
+    zobristKey*: Zobristkey
 
 func `[]`*(position: Position, color: Color): Bitboard {.inline.} =
     position.pieces[color]
@@ -39,5 +44,23 @@ func enemy*(position: Position): Color =
 
 func occupancy*(position: Position): Bitboard =
     position[red] or position[blue] or position[blocked]
+
+const zobristKeyTable = block:
+    var
+        zobristKeyTable: array[red..blocked, array[a1..g7, ZobristKey]]
+        rand = initRand(seed = 0)
+    for color in red..blocked:
+        for sq in a1..g7:
+            zobristKeyTable[color][sq] = rand.next()
+    zobristKeyTable
+
+func zobristKey*(color: Color, square: Square): ZobristKey =
+    zobristKeyTable[color][square]
+
+func calculateZobristKey*(position: Position): ZobristKey =
+    for color in red..blocked:
+        for square in position[color]:
+            result ^= zobristKey(color, square)
+    result ^= position.us.ZobristKey
 
 

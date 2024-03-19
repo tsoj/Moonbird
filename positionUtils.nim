@@ -116,4 +116,6 @@ proc toPosition*(fen: string, suppressWarnings = false): Position =
     except ValueError:
         raise newException(ValueError, "FEN fullmove number is not correctly formatted: " & getCurrentExceptionMsg())
 
+    result.zobristKey = result.calculateZobristKey
+
 const startpos* = "x5o/7/7/7/7/7/o5x x 0 1".toPosition

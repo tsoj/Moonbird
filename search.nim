@@ -10,7 +10,6 @@ import
     evaluation,
     utils,
     searchParams,
-    zobrist,
     movegen
 
 import std/[

@@ -8,7 +8,6 @@ import
     searchUtils,
     # evaluation,
     utils,
-    zobrist,
     movegen
 
 import std/[

@@ -37,15 +37,25 @@ func doMove*(position: Position, move: Move): Position =
         
         if move.isDouble:
             result.movePiece(us, source, target)
+            result.zobristKey ^= zobristKey(us, source)
         else:
             assert move.isSingle
             result.addPiece(us, target)
             result.halfmoveClock = 0
 
-        result[us] |= result[enemy] and target.mask(1)
-        result[enemy] &= not target.mask(1)
+        let captured = result[enemy] and target.singles
+        result[us] |= captured
+        result[enemy] &= not captured
+
+        for square in captured:            
+            result.zobristKey ^= zobristKey(us, square)
+            result.zobristKey ^= zobristKey(enemy, square)
+        
+        result.zobristKey ^= zobristKey(us, target)
 
     result.us = enemy
+    
+    result.zobristKey ^= red.ZobristKey xor blue.ZobristKey
 
 func pieceDelta*(move: Move, position: Position): int =
 

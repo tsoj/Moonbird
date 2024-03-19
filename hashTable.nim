@@ -2,7 +2,6 @@ import
     types,
     move,
     position,
-    zobrist,
     movegen
 
 import std/[

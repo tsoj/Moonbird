@@ -20,6 +20,7 @@ type
         pvNode,
         allNode,
         cutNode
+    ZobristKey* = uint64
     
 
 template isLeftEdge*(square: Square): bool =
