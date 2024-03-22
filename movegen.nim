@@ -14,7 +14,7 @@ func moves*(position: Position): seq[Move] =
             result.add Move(source: source, target: target)
         
         for target in source.singles and not (position.occupancy or doneTargets):
-            result.add Move(source: source, target: target)
+            result.add Move(source: target, target: target)
             doneTargets |= target.toBitboard
     
     if result.len == 0:
@@ -57,24 +57,29 @@ func doMove*(position: Position, move: Move): Position =
     
     result.zobristKey ^= red.ZobristKey xor blue.ZobristKey
 
+func isLegal*(move: Move, position: Position): bool =
+    if move == noMove: false
+    elif move == nullMove: nullMove in position.moves
+    elif move.isSingle:
+        move.target != noSquare and
+        (position[position.us] and move.target.singles) != 0 and
+        (position.occupancy and move.target.toBitboard) == 0
+    else:
+        move.source != noSquare and move.target != noSquare and
+        (position[position.us] and move.source.toBitboard) != 0 and
+        (position.occupancy and move.target.toBitboard) == 0 and
+        (move.target.toBitboard and move.source.doubles) != 0
+        
 func pieceDelta*(move: Move, position: Position): int =
 
     if move == nullMove: return 0
 
     assert move != noMove
-    assert (position[position.us] and move.source.toBitboard) != 0, "This function should be used on the position before the move"
+    assert move.isLegal(position), "This function should be used on the position before the move"
     
     if move.isSingle:
         result += 1
 
     result += 2 * countSetBits(position[position.enemy] and move.target.mask(1))
 
-func isLegal*(move: Move, position: Position): bool =
-    if move == noMove: false
-    elif move == nullMove: true
-    else:
-        move.source != noSquare and move.target != noSquare and
-        (position[position.us] and move.source.toBitboard) != 0 and
-        (position.occupancy and move.target.toBitboard) == 0 and
-        (move.target.toBitboard and (move.source.singles or move.source.doubles)) != 0
 

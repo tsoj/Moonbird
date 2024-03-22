@@ -1,12 +1,15 @@
 import
     positionUtils,
     perft,
+    move,
+    movegen,
     version
 
 import std/[
     strformat,
     terminal,
-    options
+    options,
+    random
 ]
 
 const someFens = [
@@ -89,6 +92,19 @@ proc testPerft(): Option[string] =
             if nodesTarget != nodes:
                 return some &"Perft to depth {i} for \"{fen}\" should be {nodesTarget} but is {nodes}"
 
+func zobristPerft(position: Position, depth: int): Option[(Position, Move)] =
+    if depth <= 0:
+        return
+
+    for move in position.moves:
+        let newPosition = position.doMove(move)
+        
+        if newPosition.calculateZobristKey != newPosition.zobristKey:
+            return some (position, move)
+
+        let r = newPosition.zobristPerft(depth - 1)
+        if r.isSome:
+            return r
 
 proc testZobristKeys(): Option[string] =
     for fen1 in someFens:
@@ -110,11 +126,37 @@ proc testZobristKeys(): Option[string] =
                 let (position, move) = r.get
                 return some &"Incremental zobrist key calculation failed for position \"{position.fen}\" with move {move}"
 
-        
+
+proc legalMovePerft(position: Position, depth: int): Option[(Position, Move)] =
+    if depth <= 0:
+        return
+
+    let legalMoves = position.moves
+
+    for move in position.moves:
+        let newPosition = position.doMove(move)
+
+        let fakeMove = Move(source: rand(a1..noSquare), target: rand(a1..noSquare))
+        if (fakeMove in legalMoves) != fakeMove.isLegal(position):
+            return some (position, fakeMove)
+
+        let r = newPosition.legalMovePerft(depth - 1)
+        if r.isSome:
+            return r
+
+proc testLegalMoveTest(): Option[string] =
+    for (fen, targetNodes) in perftPositions:
+        let position = fen.toPosition
+        for i, nodesTarget in targetNodes:
+            let r = position.legalMovePerft(i)
+            if r.isSome:
+                let (position, move) = r.get
+                return some &"Legal move test failed for position \"{position.fen}\" with move {move}"
 
 proc runTests*(): bool =
 
     const tests = [
+        (testLegalMoveTest, "Legal move check"),
         (testFen, "FEN parsing"),
         (testPerft, "Move generation"),
         (testZobristKeys, "Zobrist key calculation")

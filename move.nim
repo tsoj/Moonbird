@@ -15,11 +15,12 @@ const
 static: doAssert noMove != nullMove
 
 
-func isDouble*(move: Move): bool =
-    (move.source.doubles and move.target.toBitboard) != 0
-
 func isSingle*(move: Move): bool =
-    (move.source.singles and move.target.toBitboard) != 0
+    move != noMove and move != nullMove and move.source == move.target
+
+func isDouble*(move: Move): bool =
+    move != noMove and move != nullMove and not move.isSingle
+
 
 func `$`*(move: Move): string =
     if move == noMove:
@@ -36,7 +37,9 @@ func toMove*(s: string): Move =
         nullMove
     elif s == $noMove:
         noMove
-    elif s.len != 4:
-        raise newException(ValueError, "Unrecognized move string: \"" & s & "\"")
-    else:
+    elif s.len == 4:
         Move(source: s[0..1].toSquare, target: s[2..3].toSquare)
+    elif s.len == 2:
+        Move(source: s.toSquare, target: s.toSquare)
+    else:
+        raise newException(ValueError, "Unrecognized move string: \"" & s & "\"")
