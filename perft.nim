@@ -10,7 +10,7 @@ import std/[
     options
 ]
 
-func perft*(position: Position, depth: int, printRootMoveNodes = false): int64 =
+func perft*(position: Position, depth: int, printRootMoveNodes = false): int =
 
     if depth <= 0:
         return 1

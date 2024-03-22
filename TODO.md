@@ -1,1 +1,1 @@
-- TODO
+- draw detection doesn't seem to work

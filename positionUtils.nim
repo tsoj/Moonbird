@@ -1,8 +1,36 @@
 import
     position,
+    movegen,
     utils
 
 export position
+
+type GameStatus* = enum
+    running, fiftyMoveRule, threefoldRepetition, winRed, winBlue, draw
+
+func gameStatus*(position: Position): GameStatus =
+    if position[red] == 0:
+        winBlue
+
+    elif position[blue] == 0:
+        winRed
+
+    elif position.halfmoveClock >= 100:
+        fiftyMoveRule
+
+    elif position.moves.len == 0 and position.doMove(nullMove).moves.len == 0:
+        let
+            numBlue = position[blue].countSetBits
+            numRed = position[red].countSetBits
+
+        if numRed > numBlue:
+            winRed
+        elif numRed < numBlue:
+            winBlue
+        else:
+            draw
+    else:
+        running
 
 func fen*(position: Position): string =
     for rank in countdown(6, 0):

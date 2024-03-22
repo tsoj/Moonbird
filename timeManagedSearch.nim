@@ -20,7 +20,7 @@ type SearchInfo* = object
     movesToGo*: int
     increment*, timeLeft*: array[red..blue, Seconds]
     moveTime*: Seconds
-    nodes*: int64
+    nodes*: int
     eval*: EvaluationFunction = evaluate
 
 type MoveTime = object
@@ -43,7 +43,7 @@ func calculateMoveTime(moveTime, timeLeft, incPerMove: Seconds, movesToGo, halfm
         if movesToGo > 2:
             result.maxTime = min(timeLeft / 4, moveTime)
 
-iterator iterativeTimeManagedSearch*(searchInfo: SearchInfo): tuple[pv: seq[Move], value: Value, nodes: int64, passedTime: Seconds] =
+iterator iterativeTimeManagedSearch*(searchInfo: SearchInfo): tuple[pv: seq[Move], value: Value, nodes: int, passedTime: Seconds] =
 
     const numConsideredBranchingFactors = 4
 
@@ -61,7 +61,7 @@ iterator iterativeTimeManagedSearch*(searchInfo: SearchInfo): tuple[pv: seq[Move
     var
         startLastIteration = secondsSince1970()
         branchingFactors = repeat(2.0, numConsideredBranchingFactors)
-        lastNumNodes = int64.high
+        lastNumNodes = int.high
 
     for (pv, value, nodes) in iterativeDeepeningSearch(
         position = searchInfo.position,
@@ -82,7 +82,7 @@ iterator iterativeTimeManagedSearch*(searchInfo: SearchInfo): tuple[pv: seq[Move
         doAssert calculatedMoveTime.approxTime >= 0.Seconds
         
         branchingFactors.add(nodes.float / lastNumNodes.float)
-        lastNumNodes = if nodes <= 100_000: int64.high else: nodes
+        lastNumNodes = if nodes <= 100_000: int.high else: nodes
 
         let averageBranchingFactor = block:
             var average = 0.0

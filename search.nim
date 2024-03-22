@@ -38,8 +38,8 @@ type SearchState* {.requiresInit.} = object
     # killerTable*: KillerTable
     # historyTable*: HistoryTable
     repetition*: Repetition
-    countedNodes*: int64
-    maxNodes*: int64
+    countedNodes*: int
+    maxNodes*: int
     stopTime*: Seconds
     eval*: EvaluationFunction
 
@@ -90,6 +90,7 @@ func search(
         nodeType = allNode
         bestMove = noMove
         bestValue = -valueInfinity
+        moveCounter = 0
 
     if depth <= 0.Ply:
         return state.eval(position)
@@ -98,6 +99,7 @@ func search(
     for move in position.moveIterator(hashResult.bestMove):
 
         let newPosition = position.doMove(move)
+        moveCounter += 1
 
         # stop search if we exceeded maximum nodes or we got a stop signal from outside
         if state.shouldStop:
@@ -121,6 +123,17 @@ func search(
         if value > alpha:
             nodeType = pvNode
             alpha = value
+
+    if moveCounter <= 1:
+        let
+            status = position.gameStatus
+            winColor = [red: winRed, blue: winBlue]
+        if status in [draw, fiftyMoveRule, threefoldRepetition]:
+            return 0.Value
+        if status == winColor[position.us]:
+            return height.valueWin
+        if status == winColor[position.enemy]:
+            return -height.valueWin
     
     state.update(position, bestMove, depth = depth, height = height, nodeType, bestValue)
 

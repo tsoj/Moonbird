@@ -115,7 +115,7 @@ proc go(uaiState: var UaiState, params: seq[string]) =
         increment: [red: 0.Seconds, blue: 0.Seconds],
         timeLeft: [red: Seconds.high, blue: Seconds.high],
         moveTime: Seconds.high,
-        nodes: int64.high
+        nodes: int.high
     )
 
     for i in 0..<params.len:

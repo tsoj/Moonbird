@@ -18,7 +18,7 @@ import std/[
     sets
 ]
 
-func launchSearch(position: Position, state: var SearchState, depth: Ply): int64 =
+func launchSearch(position: Position, state: var SearchState, depth: Ply): int =
     try:
         position.search(state, depth = depth)
         return state.countedNodes
@@ -37,10 +37,10 @@ iterator iterativeDeepeningSearch*(
     hashTable: var HashTable,
     positionHistory: seq[Position],
     targetDepth: Ply,
-    maxNodes: int64,
+    maxNodes: int,
     stopTime: Seconds,
     eval: EvaluationFunction
-): tuple[pv: seq[Move], value: Value, nodes: int64] {.noSideEffect.} =
+): tuple[pv: seq[Move], value: Value, nodes: int] {.noSideEffect.} =
 
     var
         totalNodes = 0'i64

@@ -22,7 +22,7 @@ export SearchInfo
 proc infoString(
     iteration: int,
     value: Value,
-    nodes: int64,
+    nodes: int,
     pv: seq[Move],
     time: Seconds,
     hashFull: int
