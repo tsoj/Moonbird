@@ -1,36 +1,22 @@
 import
-    types,
-    position,
-    positionUtils,
-    move,
-    search,
-    hashTable,
-    searchUtils,
-    evaluation,
-    utils,
-    movegen
+  types, position, positionUtils, move, search, hashTable, searchUtils, evaluation,
+  utils, movegen
 
-import std/[
-    os,
-    atomics,
-    strformat,
-    options,
-    sets
-]
+import std/[os, atomics, strformat, options, sets]
 
 func launchSearch(position: Position, state: var SearchState, depth: Ply): int =
-    try:
-        position.search(state, depth = depth)
-        return state.countedNodes
-    except CatchableError:
-        {.cast(noSideEffect).}:
-            debugEcho "Caught exception: ", getCurrentExceptionMsg()
-            debugEcho getCurrentException().getStackTrace()
-    except Exception:
-        {.cast(noSideEffect).}:
-            debugEcho "Caught exception: ", getCurrentExceptionMsg()
-            debugEcho getCurrentException().getStackTrace()
-            quit(QuitFailure)
+  try:
+    position.search(state, depth = depth)
+    return state.countedNodes
+  except CatchableError:
+    {.cast(noSideEffect).}:
+      debugEcho "Caught exception: ", getCurrentExceptionMsg()
+      debugEcho getCurrentException().getStackTrace()
+  except Exception:
+    {.cast(noSideEffect).}:
+      debugEcho "Caught exception: ", getCurrentExceptionMsg()
+      debugEcho getCurrentException().getStackTrace()
+      quit(QuitFailure)
 
 iterator iterativeDeepeningSearch*(
     position: Position,
@@ -39,38 +25,36 @@ iterator iterativeDeepeningSearch*(
     targetDepth: Ply,
     maxNodes: int,
     stopTime: Seconds,
-    eval: EvaluationFunction
+    eval: EvaluationFunction,
 ): tuple[pv: seq[Move], value: Value, nodes: int] {.noSideEffect.} =
+  var
+    totalNodes = 0'i64
+    searchState = SearchState(
+      stop: false,
+      countedNodes: 0,
+      hashTable: addr hashTable,
+      repetition: newRepetition(positionHistory),
+      maxNodes: maxNodes,
+      stopTime: stopTime,
+      eval: eval,
+    )
+
+  hashTable.age()
+
+  for depth in 1.Ply .. targetDepth:
+    let nodes = launchSearch(position, searchState, depth)
+    totalNodes += nodes
 
     var
-        totalNodes = 0'i64
-        searchState = SearchState(
-            stop: false,
-            countedNodes: 0,
-            hashTable: addr hashTable,
-            repetition: newRepetition(positionHistory),
-            maxNodes: maxNodes,
-            stopTime: stopTime,
-            eval: eval
-        )
+      pv = hashTable.getPv(position)
+      value = hashTable.get(position.zobristKey).value
 
-    hashTable.age()        
+    if pv.len == 0:
+      debugEcho &"WARNING: Couldn't find PV at root node.\n{position.fen = }"
+      doAssert position.moves.len > 0
+      pv = @[position.moves[0]]
 
-    for depth in 1.Ply..targetDepth:
-        let nodes = launchSearch(position, searchState, depth)
-        totalNodes += nodes
-        
+    yield (pv: pv, value: value, nodes: nodes)
 
-        var
-            pv = hashTable.getPv(position)
-            value = hashTable.get(position.zobristKey).value
-                    
-        if pv.len == 0:
-            debugEcho &"WARNING: Couldn't find PV at root node.\n{position.fen = }"
-            doAssert position.moves.len > 0
-            pv = @[position.moves[0]]
-
-        yield (pv: pv, value: value, nodes: nodes)
-        
-        if searchState.stop or totalNodes >= maxNodes:
-            break
+    if searchState.stop or totalNodes >= maxNodes:
+      break
