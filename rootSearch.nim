@@ -6,7 +6,7 @@ import
     search,
     hashTable,
     searchUtils,
-    # evaluation,
+    evaluation,
     utils,
     movegen
 
@@ -35,19 +35,23 @@ func launchSearch(position: Position, state: var SearchState, depth: Ply): int64
 iterator iterativeDeepeningSearch*(
     position: Position,
     hashTable: var HashTable,
-    positionHistory: seq[Position] = @[],
-    targetDepth: Ply = Ply.high,
-    maxNodes = int64.high,
-    stopTime = Seconds.high
+    positionHistory: seq[Position],
+    targetDepth: Ply,
+    maxNodes: int64,
+    stopTime: Seconds,
+    eval: EvaluationFunction
 ): tuple[pv: seq[Move], value: Value, nodes: int64] {.noSideEffect.} =
 
     var
         totalNodes = 0'i64
         searchState = SearchState(
+            stop: false,
+            countedNodes: 0,
             hashTable: addr hashTable,
             repetition: newRepetition(positionHistory),
             maxNodes: maxNodes,
-            stopTime: stopTime
+            stopTime: stopTime,
+            eval: eval
         )
 
     hashTable.age()        

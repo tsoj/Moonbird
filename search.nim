@@ -32,7 +32,7 @@ import std/[
 #     let halfLife = lmrDepthHalfLife()
 #     result = ((depth.int * halfLife) div (halfLife + lmrMoveCounter)).Ply - lmrDepthSub()
 
-type SearchState* = object
+type SearchState* {.requiresInit.} = object
     stop*: bool
     hashTable*: ptr HashTable
     # killerTable*: KillerTable
@@ -41,6 +41,7 @@ type SearchState* = object
     countedNodes*: int64
     maxNodes*: int64
     stopTime*: Seconds
+    eval*: EvaluationFunction
 
 func shouldStop(state: var SearchState): bool =
     if state.countedNodes >= state.maxNodes or
@@ -87,7 +88,7 @@ func search(
         bestValue = -valueInfinity
 
     if depth <= 0.Ply or state.repetition.addAndCheckForRepetition(position, height):
-        return position.evaluate
+        return state.eval(position)
 
     # iterate over all moves and recursively search the new positions
     for move in position.moveIterator(hashResult.bestMove):

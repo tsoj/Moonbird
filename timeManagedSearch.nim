@@ -4,7 +4,7 @@ import
     position,
     hashTable,
     rootSearch,
-    # evaluation,
+    evaluation,
     utils
 
 import std/[
@@ -21,6 +21,7 @@ type SearchInfo* = object
     increment*, timeLeft*: array[red..blue, Seconds]
     moveTime*: Seconds
     nodes*: int64
+    eval*: EvaluationFunction = evaluate
 
 type MoveTime = object
     maxTime, approxTime: Seconds
@@ -68,7 +69,8 @@ iterator iterativeTimeManagedSearch*(searchInfo: SearchInfo): tuple[pv: seq[Move
         positionHistory = searchInfo.positionHistory,
         targetDepth = searchInfo.targetDepth,
         maxNodes = searchInfo.nodes,
-        stopTime = start + calculatedMoveTime.maxTime
+        stopTime = start + calculatedMoveTime.maxTime,
+        eval = searchInfo.eval
     ):
         let
             totalPassedTime = secondsSince1970() - start
