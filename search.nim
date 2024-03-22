@@ -74,7 +74,11 @@ func search(
 
     state.countedNodes += 1
 
-    if (height == Ply.high or position.halfmoveClock >= 100) and height > 0.Ply:
+    if height > 0.Ply and (
+        height == Ply.high or
+        position.halfmoveClock >= 100 or
+        state.repetition.addAndCheckForRepetition(position, height)
+    ):
         return 0.Value
     
     let
@@ -87,7 +91,7 @@ func search(
         bestMove = noMove
         bestValue = -valueInfinity
 
-    if depth <= 0.Ply or state.repetition.addAndCheckForRepetition(position, height):
+    if depth <= 0.Ply:
         return state.eval(position)
 
     # iterate over all moves and recursively search the new positions
