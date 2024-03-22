@@ -1,23 +1,55 @@
 import types
 
-import std/[options, strutils, times, os, osproc]
+import std/[options, strutils, times, os, osproc, terminal, streams]
 
-export options, strutils
+export options, strutils, terminal, streams
 
 const megaByteToByte* = 1_048_576
 
-func boardString*(f: proc(square: Square): Option[string] {.noSideEffect.}): string =
-  result = " _ _ _ _ _ _ _\n"
+func printBoardString*(
+    outStream: File or Stream,
+    piece: proc(square: Square): Option[(string, ForegroundColor)] {.noSideEffect.},
+) =
+  proc print(text: string, style: set[Style] = {}, color = fgDefault) =
+    {.cast(noSideEffect).}:
+      when outStream is File:
+        outStream.styledWrite resetStyle, color, style, text
+      elif outStream is Stream:
+        outStream.write text
+      else:
+        doAssert false
+
+  print(" _ _ _ _ _ _ _\n", style = {styleDim})
   for rank in countdown(6, 0):
     for file in 0 .. 6:
-      result &= "|"
-      let s = f((7 * rank + file).Square)
-      if s.isSome:
-        result &= s.get()
+      print("|", style = {styleDim})
+      let o = piece((7 * rank + file).Square)
+      if o.isSome:
+        let (s, color) = o.get()
+        print(s, color = color)
       else:
-        result &= "_"
-    result &= "|" & intToStr(rank + 1) & "\n"
-  result &= " A B C D E F G"
+        print("_", style = {styleDim})
+    print("|" & intToStr(rank + 1) & "\n", style = {styleDim})
+  print(" A B C D E F G", style = {styleDim})
+
+  {.cast(noSideEffect).}:
+    outStream.write "\n"
+    when outStream is File:
+      outStream.flushFile
+    elif outStream is Stream:
+      outStream.flush
+    else:
+      doAssert false
+
+func boardString*(
+    piece: proc(square: Square): Option[(string, ForegroundColor)] {.noSideEffect.}
+): string =
+  {.cast(noSideEffect).}:
+    var strm = newStringStream()
+    strm.printBoardString(piece = piece)
+    strm.setPosition(0)
+    result = strm.readAll()
+    strm.close()
 
 proc getCpuInfo*(): string =
   when defined(posix):

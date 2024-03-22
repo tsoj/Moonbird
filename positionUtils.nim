@@ -17,7 +17,8 @@ func gameStatus*(position: Position): GameStatus =
     winRed
   elif position.halfmoveClock >= 100:
     fiftyMoveRule
-  elif position.moves.len == 0 and position.doMove(nullMove).moves.len == 0:
+  elif ((position[red] or position[blue]).singles.singles and not position.occupancy) ==
+      0:
     let
       numBlue = position[blue].countSetBits
       numRed = position[red].countSetBits
@@ -53,25 +54,45 @@ func fen*(position: Position): string =
   result &= (if position.us == red: " o " else: " x ")
   result &= $position.halfmoveClock & " " & $(position.halfmovesPlayed div 2)
 
-func `$`*(position: Position): string =
-  result =
-    boardString(
-      proc(square: Square): Option[string] =
-        let color = position[square]
-        if color != noColor:
-          return some(
-            case color
-            of red: "⬤"
-            of blue: "✖"
-            of blocked: "🞓"
-            else: "?"
-          )
-        none(string)
-    ) & "\n"
+func printPosition*(stream: File or Stream, position: Position) =
+  stream.printBoardString(
+    proc(square: Square): auto =
+      let color = position[square]
+      if color != noColor:
+        return some(
+          case color
+          of red:
+            ("🏶", fgRed)
+          of blue:
+            ("♠", fgBlue)
+          of blocked:
+            ("🞓", fgDefault)
+          else:
+            ("?", fgDefault)
+        )
+      none (string, ForegroundColor)
+  )
 
   let fenWords = position.fen.splitWhitespace
-  for i in 1 ..< fenWords.len:
-    result &= fenWords[i] & " "
+
+  {.cast(noSideEffect).}:
+    for i in 1 ..< fenWords.len:
+      stream.write fenWords[i], " "
+    stream.write "\n"
+    when stream is File:
+      stream.flushFile
+    elif stream is Stream:
+      stream.flush
+    else:
+      doAssert false
+
+func `$`*(position: Position): string =
+  {.cast(noSideEffect).}:
+    var strm = newStringStream()
+    strm.printPosition(position = position)
+    strm.setPosition(0)
+    result = strm.readAll()
+    strm.close()
 
 proc toPosition*(fen: string, suppressWarnings = false): Position =
   var fenWords = fen.splitWhitespace()

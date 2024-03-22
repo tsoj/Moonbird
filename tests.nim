@@ -120,8 +120,8 @@ proc testLegalMoveTest(): Option[string] =
 
 proc runTests*(): bool =
   const tests = [
-    (testLegalMoveTest, "Legal move check"),
     (testFen, "FEN parsing"),
+    (testLegalMoveTest, "Legal move check"),
     (testPerft, "Move generation"),
     (testZobristKeys, "Zobrist key calculation"),
   ]

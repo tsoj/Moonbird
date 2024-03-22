@@ -34,21 +34,22 @@ iterator items*(bitboard: Bitboard): Square {.inline.} =
     yield occ.countTrailingZeroBits.Square
     occ &= occ - 1
 
-func bitboardString*(bitboard: Bitboard): string =
+func toString*(bitboard: Bitboard): string =
   boardString(
-    proc(square: Square): Option[string] =
+    proc(square: Square): auto =
       if (square.toBitboard and bitboard) != 0:
-        return some("●")
-      none(string)
+        some ("●", fgDefault)
+      else:
+        none (string, ForegroundColor)
   )
 
-func file(square: Square): Bitboard =
+func file*(square: Square): Bitboard =
   const aFile =
     a1.toBitboard or a2.toBitboard or a3.toBitboard or a4.toBitboard or a5.toBitboard or
     a6.toBitboard or a7.toBitboard
   (aFile shl (square.int mod 7))
 
-func rank(square: Square): Bitboard =
+func rank*(square: Square): Bitboard =
   const rank1 = 0b1111111.Bitboard
   (rank1 shl (7 * (square.int div 7)))
 

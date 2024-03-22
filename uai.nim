@@ -164,7 +164,7 @@ proc uaiLoop*() =
       of "uainewgame":
         uaiState.uaiNewGame()
       of "print":
-        echo uaiState.position
+        stdout.printPosition uaiState.position
       of "fen":
         echo uaiState.position.fen
       of "perft":
