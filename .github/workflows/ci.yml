@@ -2,7 +2,7 @@ name: Moonbird
 on: [push, pull_request]
 
 jobs:
-  build:
+  build_and_test:
     runs-on: ubuntu-22.04
     env:
       NIM_DIR: nim-devel-amd64
