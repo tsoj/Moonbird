@@ -1,6 +1,14 @@
 import
-  position, positionUtils, hashTable, searchParams, version, utils, uaiSearch, movegen,
-  tests, perft
+  position,
+  positionUtils,
+  hashTable,
+  searchParams,
+  version,
+  utils,
+  uaiSearch,
+  movegen,
+  perft,
+  ../tests/tests
 
 import std/[strutils, strformat]
 

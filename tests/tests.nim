@@ -1,4 +1,10 @@
-import positionUtils, perft, move, movegen, version, game
+import
+  ../src/positionUtils,
+  ../src/perft,
+  ../src/move,
+  ../src/movegen,
+  ../src/version,
+  ../src/game
 
 import std/[strformat, terminal, options, random]
 

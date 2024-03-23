@@ -25,5 +25,6 @@ jobs:
       - name: Run tests
         run: |
           cd Moonbird
-          nim c Moonbird.nim
+          nimble build
+          nimble test
           nim r tests.nim

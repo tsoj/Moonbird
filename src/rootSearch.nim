@@ -2,7 +2,7 @@ import
   types, position, positionUtils, move, search, hashTable, searchUtils, evaluation,
   utils, movegen
 
-import std/[os, atomics, strformat, options, sets]
+import std/[strformat]
 
 func launchSearch(position: Position, state: var SearchState, depth: Ply): int =
   try:
