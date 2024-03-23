@@ -1,4 +1,4 @@
-import positionUtils, perft, move, movegen, version
+import positionUtils, perft, move, movegen, version, game
 
 import std/[strformat, terminal, options, random]
 
@@ -118,12 +118,21 @@ proc testLegalMoveTest(): Option[string] =
         let (position, move) = r.get
         return some &"Legal move test failed for position \"{position.fen}\" with move {move}"
 
+proc playGames(): Option[string] =
+  for fen in someFens:
+    try:
+      var game = newGame(fen.toPosition, maxNodes = 10_000)
+      discard game.playGame()
+    except CatchableError:
+      return some &"Encountered error while playing a game from start position {fen}: {getCurrentExceptionMsg()}"
+
 proc runTests*(): bool =
   const tests = [
     (testFen, "FEN parsing"),
     (testLegalMoveTest, "Legal move check"),
     (testPerft, "Move generation"),
     (testZobristKeys, "Zobrist key calculation"),
+    (playGames, "Playing games"),
   ]
 
   var failedTests = 0

@@ -12,9 +12,6 @@ jobs:
           - os: linux
             cpu: amd64
             nim_branch: devel
-          - os: macos
-            cpu: amd64
-            nim_branch: devel
           - os: windows
             cpu: amd64
             nim_branch: devel
@@ -22,9 +19,6 @@ jobs:
           - target:
               os: linux
             builder: ubuntu-22.04
-          - target:
-              os: macos
-            builder: macos-11
           - target:
               os: windows
             builder: windows-2019
@@ -106,4 +100,3 @@ jobs:
           cd Moonbird
           nim c Moonbird.nim
           nim r tests.nim
-          nim r game.nim
