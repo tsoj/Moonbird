@@ -6,14 +6,9 @@
 ┛ ┗┗┛┗┛┛┗┗┛┗┛ ┗┻━━━━>━>━─┄┈
 ```
 
-### Test
+### Compile and run
 
-```
-nim r tests.nim
-```
-
-### Compile
-
-```
-nim c Moonbird.nim
+```bash
+nimble build
+./Moonbird
 ```
