@@ -27,4 +27,3 @@ jobs:
           cd Moonbird
           nimble build
           nimble test
-          nim r tests.nim
