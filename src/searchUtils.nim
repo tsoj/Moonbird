@@ -1,4 +1,4 @@
-import types, move, position, searchParams
+import types, move, position
 
 import std/[math, sets]
 

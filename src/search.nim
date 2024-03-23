@@ -1,8 +1,6 @@
 import
   types, bitboard, position, positionUtils, move, searchUtils, moveIterator, hashTable,
-  evaluation, utils, searchParams, movegen
-
-import std/[atomics, options]
+  evaluation, utils, movegen
 
 # static: doAssert pawn.value == 100.cp
 
