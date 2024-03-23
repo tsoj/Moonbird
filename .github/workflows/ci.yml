@@ -111,5 +111,5 @@ jobs:
         run: |
           cd Moonbird
           nim c Moonbird.nim
-          nim r test.nim
+          nim r tests.nim
           nim r game.nim
