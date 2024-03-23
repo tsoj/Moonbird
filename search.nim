@@ -114,7 +114,7 @@ func search(
       status = position.gameStatus
       winColor = [red: winRed, blue: winBlue]
 
-    if status in [draw, fiftyMoveRule, threefoldRepetition]:
+    if status in [draw, fiftyMoveRule]:
       return 0.Value
     if status == winColor[position.us]:
       return height.valueWin

@@ -19,28 +19,28 @@ func launchSearch(position: Position, state: var SearchState, depth: Ply): int =
       quit(QuitFailure)
 
 iterator iterativeDeepeningSearch*(
-    position: Position,
-    hashTable: var HashTable,
     positionHistory: seq[Position],
+    hashTable: var HashTable,
     targetDepth: Ply,
     maxNodes: int,
     stopTime: Seconds,
     eval: EvaluationFunction,
 ): tuple[pv: seq[Move], value: Value, nodes: int] {.noSideEffect.} =
+  doAssert positionHistory.len >= 1, "Need at least one position"
+  let position = positionHistory[^1]
   var
     totalNodes = 0'i64
     searchState = SearchState(
       stop: false,
       countedNodes: 0,
       hashTable: addr hashTable,
-      repetition: newRepetition(positionHistory),
+      repetition: newRepetition(positionHistory[0 ..^ 2]),
       maxNodes: maxNodes,
       stopTime: stopTime,
       eval: eval,
     )
 
   hashTable.age()
-
   for depth in 1.Ply .. targetDepth:
     let nodes = launchSearch(position, searchState, depth)
     totalNodes += nodes

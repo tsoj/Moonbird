@@ -1,116 +1,113 @@
-import
-    position,
-    positionUtils,
-    movegen,
-    timeManagedSearch,
-    evalution,
-    hashTable
+import position, positionUtils, movegen, timeManagedSearch, evaluation, hashTable
 
-import std/[
-    tables
-]
+import std/[tables]
 
-type
-    Game* {.requiresInit.} = object
-        hashTable: ref HashTable
-        positionHistory: seq[Position]
-        evals: Table[Position, Value] = initTable[Position, Value]()
-        maxNodes: int
-        adjudicateEasyFill: bool
-        adjudicateThreefoldRepetition: bool
-        evaluation: EvaluationFunction
-    GameStatus* = enum
-        running, fiftyMoveRule, threefoldRepetition, winRed, winBlue, draw
+type Game* {.requiresInit.} = object
+  positionHistory*: seq[Position]
+  evals: Table[Position, Value] = initTable[Position, Value]()
+  maxNodes: int
+  evaluation: EvaluationFunction
+  hashTable: ref HashTable
+
+func getPositionHistory*(game: Game): seq[(Position, Value)] =
+  for position in game.positionHistory:
+    let value =
+      if position in game.evals:
+        game.evals[position]
+      else:
+        valueInfinity
+    result.add (position, value)
+
+proc makeNextMove(game: var Game): (GameStatus, Value, Move) =
+  doAssert game.positionHistory.len >= 1
+
+  let position = game.positionHistory[^1]
+
+  if position.gameStatus != running:
+    return (position.gameStatus, 0.Value, noMove)
+
+  let
+    searchInfo = SearchInfo(
+      positionHistory: game.positionHistory,
+      hashTable: game.hashTable[].addr,
+      nodes: game.maxNodes,
+      eval: game.evaluation,
+    )
+    (pv, value) = searchInfo.timeManagedSearch()
+    absoluteValue =
+      if position.us == blue:
+        value
+      else:
+        -value
+  doAssert pv.len >= 1
+  doAssert pv[0] != noMove
+  doAssert position notin game.evals
+
+  game.evals[position] = absoluteValue
+  game.positionHistory.add position.doMove pv[0]
+
+  (game.positionHistory[^1].gameStatus, absoluteValue, pv[0])
+
+func newGame*(
+    startingPosition: Position,
+    maxNodes = 20_000,
+    hashTable: ref HashTable = nil,
+    evaluation: EvaluationFunction = evaluate,
+): Game =
+  result = Game(
+    positionHistory: @[startingPosition],
+    hashTable: hashTable,
+    maxNodes: maxNodes,
+    evaluation: evaluation,
+  )
+
+  if result.hashTable == nil:
+    {.warning[ProveInit]: off.}:
+      result.hashTable = new HashTable
+    result.hashTable[] = newHashTable(len = maxNodes * 2)
+
+proc playGame*(game: var Game, printInfo = false): float =
+  doAssert game.positionHistory.len >= 1, "Need a starting position"
+
+  if printInfo:
+    echo "----------------------------"
+    echo "starting position:"
+    stdout.printPosition game.positionHistory[0]
+
+  var
+    drawPlies = 0
+    whiteResignPlies = 0
+    blackResignPlies = 0
+
+  while true:
+    let (gameStatus, value, move) = game.makeNextMove()
+
+    if printInfo:
+      echo "--------------"
+      echo "Move: " & $move
+      stdout.printPosition game.positionHistory[^1]
+      echo "Value: " & $value
+      if gameStatus != running:
+        echo gameStatus
+
+    if gameStatus != running:
+      case gameStatus
+      of draw, fiftyMoveRule:
+        result = 0.5
+      of winBlue:
+        result = 1.0
+      of winRed:
+        result = 0.0
+      else:
+        doAssert false, $gameStatus
+
+      if printInfo:
+        echo "Game status: ", gameStatus
+        echo "Result: ", result
+
+      break
 
 
-func gameStatus(position: Position): GameStatus =
-    if position[red] == 0:
-        winBlue
-
-    elif position[blue] == 0:
-        winRed
-
-    elif position.halfmoveClock >= 100:
-        fiftyMoveRule
-
-    elif position.moves.len == 0 and position.doMove(nullMove).moves.len == 0:
-        let
-            numBlue = position[blue].countSetBits
-            numRed = position[red].countSetBits
-
-        if numRed > numBlue:
-            winRed
-        elif numRed < numBlue:
-            winBlue
-        else:
-            draw
-    else:
-        running
-
-
-
-func canAdjudicateEasyfill(position: Position): bool =
-    
-
-
-
-
-
-
-
-
-
-
-
-    const auto our_reach = (pos.get_us().singles() | pos.get_us().doubles());
-    const auto them_stuck = our_reach & pos.get_them();
-    const auto them_free = pos.get_them() ^ them_stuck;
-    const auto both_reach = pos.get_both().singles() | pos.get_both().doubles();
-
-    // Is the game already over?
-    if (pos.is_gameover()) {
-        return false;
-    }
-
-    // Can we still move?
-    if (our_reach & pos.get_empty()) {
-        return false;
-    }
-
-    // Can they move without releasing us?
-    if (!((pos.get_them().singles() | them_free.doubles()) & pos.get_empty())) {
-        return false;
-    }
-
-    // Pretend they get everything, is it enough?
-    if (pos.get_us().count() > pos.get_them().count() + pos.get_empty().count()) {
-        return false;
-    }
-
-    const auto reachable = [&] {
-        auto bb = (pos.get_them().singles() | them_free.doubles()) & pos.get_empty();
-        bb |= (bb.singles() | bb.doubles()) & pos.get_empty();
-        bb |= (bb.singles() | bb.doubles()) & pos.get_empty();
-        bb |= (bb.singles() | bb.doubles()) & pos.get_empty();
-        bb |= (bb.singles() | bb.doubles()) & pos.get_empty();
-        bb |= (bb.singles() | bb.doubles()) & pos.get_empty();
-        bb |= (bb.singles() | bb.doubles()) & pos.get_empty();
-        bb |= (bb.singles() | bb.doubles()) & pos.get_empty();
-        bb |= (bb.singles() | bb.doubles()) & pos.get_empty();
-        bb |= (bb.singles() | bb.doubles()) & pos.get_empty();
-        bb |= (bb.singles() | bb.doubles()) & pos.get_empty();
-        return bb;
-    }();
-
-    const auto reservoirs = (pos.get_empty() | pos.get_them()).singles() & (pos.get_empty() | pos.get_them());
-    if (!(reachable & reservoirs)) {
-        return false;
-    }
-
-    if ((reachable & reservoirs) && pos.get_them().count() + reachable.count() < pos.get_us().count()) {
-        return false;
-    }
-
-    return true;
-}
-
+when isMainModule:
+  var game = newGame("x5o/7/2-1-2/7/2-1-2/7/o5x x 0 1".toPosition, maxNodes = 100_000)
+  discard game.playGame(printInfo = true)

@@ -2,15 +2,14 @@ import types, move, position, hashTable, rootSearch, evaluation, utils
 
 import std/[sequtils]
 
-type SearchInfo* = object
-  position*: Position
-  hashTable*: ptr HashTable
+type SearchInfo* {.requiresInit.} = object
   positionHistory*: seq[Position]
-  targetDepth*: Ply
-  movesToGo*: int
-  increment*, timeLeft*: array[red .. blue, Seconds]
-  moveTime*: Seconds
-  nodes*: int
+  hashTable*: ptr HashTable
+  targetDepth*: Ply = Ply.high
+  movesToGo*: int = int.high
+  increment*, timeLeft*: array[red .. blue, Seconds] = [red: Seconds.high, blue: Seconds.high]
+  moveTime*: Seconds = Seconds.high
+  nodes*: int = int.high
   eval*: EvaluationFunction = evaluate
 
 type MoveTime = object
@@ -40,14 +39,17 @@ iterator iterativeTimeManagedSearch*(
 ): tuple[pv: seq[Move], value: Value, nodes: int, passedTime: Seconds] =
   const numConsideredBranchingFactors = 4
 
+  doAssert searchInfo.positionHistory.len >= 1, "Need at least one position"
+  
   let
-    us = searchInfo.position.us
+    position = searchInfo.positionHistory[^1]
+    us = position.us
     calculatedMoveTime = calculateMoveTime(
       searchInfo.moveTime,
       searchInfo.timeLeft[us],
       searchInfo.increment[us],
       searchInfo.movesToGo,
-      searchInfo.position.halfmovesPlayed,
+      position.halfmovesPlayed,
     )
 
   let start = secondsSince1970()
@@ -57,9 +59,8 @@ iterator iterativeTimeManagedSearch*(
     lastNumNodes = int.high
 
   for (pv, value, nodes) in iterativeDeepeningSearch(
-    position = searchInfo.position,
-    hashTable = searchInfo.hashTable[],
     positionHistory = searchInfo.positionHistory,
+    hashTable = searchInfo.hashTable[],
     targetDepth = searchInfo.targetDepth,
     maxNodes = searchInfo.nodes,
     stopTime = start + calculatedMoveTime.maxTime,

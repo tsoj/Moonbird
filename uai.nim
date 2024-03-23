@@ -8,10 +8,13 @@ const
   defaultHashSizeMB = 4
   maxHashSizeMB = 1_048_576
 
-type UaiState = object
-  position: Position
+type UaiState {.requiresInit.} = object
   history: seq[Position]
   hashTable: HashTable
+
+func currentPosition(uaiState: UaiState): Position =
+  doAssert uaiState.history.len >= 1
+  uaiState.history[^1]
 
 proc uai(uaiState: var UaiState) =
   echo "id name Moonbird " & versionOrId()
@@ -37,28 +40,22 @@ proc setOption(uaiState: var UaiState, params: seq[string]) =
   else:
     echo "Unknown parameters"
 
-proc moves(position: Position, params: seq[string]): (seq[Position], Position) =
+proc moves(position: Position, params: seq[string]): seq[Position] =
   if params.len < 1:
     echo "Missing moves"
 
-  var
-    history: seq[Position]
-    position = position
+  result = @[position]
 
   for i in 0 ..< params.len:
-    history.add(position)
-    position = position.doMove(params[i].toMove)
-
-  (history, position)
+    result.add result[^1].doMove(params[i].toMove)
 
 proc setPosition(uaiState: var UaiState, params: seq[string]) =
   var
     index = 0
-    position: Position
     history: seq[Position]
 
   if params.len >= 1 and params[0] == "startpos":
-    position = startpos
+    history = @[startpos]
     index = 1
   elif params.len >= 1 and params[0] == "fen":
     var fen: string
@@ -69,25 +66,21 @@ proc setPosition(uaiState: var UaiState, params: seq[string]) =
         numFenWords += 1
         fen &= " " & params[index]
       index += 1
-    position = fen.toPosition
+    history = @[fen.toPosition]
   else:
     echo "Unknown parameters"
     return
 
   if params.len > index and params[index] == "moves":
     index += 1
-    let r = moves(position, params[index ..^ 1])
-    history = r[0]
-    position = r[1]
+    history = moves(history[^1], params[index ..^ 1])
 
-  uaiState.position = position
-  uaiState.position = position
+  uaiState.history = history
 
 proc go(uaiState: var UaiState, params: seq[string]) =
   var searchInfo = SearchInfo(
-    position: uaiState.position,
-    hashTable: addr uaiState.hashTable,
     positionHistory: uaiState.history,
+    hashTable: addr uaiState.hashTable,
     targetDepth: Ply.high,
     movesToGo: int.high,
     increment: [red: 0.Seconds, blue: 0.Seconds],
@@ -131,7 +124,8 @@ proc perft(uaiState: UaiState, params: seq[string]) =
   if params.len >= 1:
     let
       start = secondsSince1970()
-      nodes = uaiState.position.perft(params[0].parseInt, printRootMoveNodes = true)
+      nodes =
+        uaiState.currentPosition.perft(params[0].parseInt, printRootMoveNodes = true)
       s = secondsSince1970() - start
     echo nodes, " nodes in ", fmt"{s.float:0.3f}", " seconds"
     echo (nodes.float / s.float).int, " nodes per second"
@@ -139,7 +133,7 @@ proc perft(uaiState: UaiState, params: seq[string]) =
     echo "Missing depth parameter"
 
 proc uaiLoop*() =
-  var uaiState = UaiState(position: startpos, hashtable: newHashTable())
+  var uaiState = UaiState(history: @[startpos], hashtable: newHashTable())
   uaiState.hashTable.setByteSize(sizeInBytes = defaultHashSizeMB * megaByteToByte)
 
   while true:
@@ -164,9 +158,9 @@ proc uaiLoop*() =
       of "uainewgame":
         uaiState.uaiNewGame()
       of "print":
-        stdout.printPosition uaiState.position
+        stdout.printPosition uaiState.currentPosition
       of "fen":
-        echo uaiState.position.fen
+        echo uaiState.currentPosition.fen
       of "perft":
         uaiState.perft(params[1 ..^ 1])
       of "test":

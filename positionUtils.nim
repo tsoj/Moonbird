@@ -5,7 +5,6 @@ export position
 type GameStatus* = enum
   running
   fiftyMoveRule
-  threefoldRepetition
   winRed
   winBlue
   draw
