@@ -2,14 +2,12 @@ import
   ../position,
   ../hashTable,
   ../evaluation,
-  ../search,
   ../positionUtils,
-  ../timeManagedSearch,
   ../game
 
 import taskpools
 
-import std/[os, random, locks, atomics, streams, strformat, times, cpuinfo, sets]
+import std/[os, random, locks, atomics, streams, strformat, times, cpuinfo]
 
 const
   openingFilename = "res/startpos.txt"
