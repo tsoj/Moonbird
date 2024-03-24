@@ -3,6 +3,7 @@ import move, position, bitboard
 export move, position
 
 func moves*(position: Position): seq[Move] =
+  result = newSeqOfCap[Move](128)
   for source in position[position.us]:
     for target in source.doubles and not position.occupancy:
       result.add Move(source: source, target: target)

@@ -25,5 +25,6 @@ jobs:
       - name: Run tests
         run: |
           cd Moonbird
-          nimble build
+          nimble debug
+          nimble default
           nimble test

@@ -6,7 +6,7 @@ import
   ../src/version,
   ../src/game
 
-import std/[strformat, terminal, options, random]
+import std/[strformat, terminal, options, random, streams]
 
 const someFens = [
   "x5o/7/7/7/7/7/o5x x 0 1", "x5o/7/2-1-2/7/2-1-2/7/o5x x 0 1",
@@ -130,11 +130,24 @@ proc playGames(): Option[string] =
       var game = newGame(fen.toPosition, maxNodes = 10_000)
       discard game.playGame()
     except CatchableError:
-      return some &"Encountered error while playing a game from start position {fen}: {getCurrentExceptionMsg()}"
+      return some &"Encountered error while playing a game from start position \"{fen}\": {getCurrentExceptionMsg()}"
+
+proc positionStreams(): Option[string] =
+  for fen in someFens:
+    let position = fen.toPosition
+
+    var strm = newStringStream()
+    strm.writePosition position
+    strm.setPosition(0)
+    let position2 = strm.readPosition
+    strm.close()
+    if position2 != position:
+      return some &"Failed to convert to binary stream and back for \"{fen}\""
 
 proc runTests*(): bool =
   const tests = [
     (testFen, "FEN parsing"),
+    (positionStreams, "Binary position streams"),
     (testLegalMoveTest, "Legal move check"),
     (testPerft, "Move generation"),
     (testZobristKeys, "Zobrist key calculation"),

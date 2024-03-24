@@ -5,7 +5,7 @@ import std/[random]
 export types, bitboard
 
 type Position* = object
-  pieces: array[red .. blocked, Bitboard]
+  pieces*: array[red .. blocked, Bitboard]
   us*: Color
   halfmoveClock*, halfmovesPlayed*: int
   zobristKey*: Zobristkey

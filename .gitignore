@@ -1,2 +1,7 @@
-Moonbird
+bin
+res/data
 tests/tests
+trainingSet_*.bin
+perf.data*
+generateTrainingData
+nim.cfg
