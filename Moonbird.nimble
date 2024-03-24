@@ -4,8 +4,6 @@ import src/version
 author = "Jost Triller"
 description = "An Ataxx engine"
 license = "MIT"
-# srcDir = "src"
-# bin = @["Moonbird"]
 
 # Dependencies
 requires "nim >= 2.1.1"
@@ -72,7 +70,7 @@ task native, "native compile":
   switch("o", name & "-native" & suffix)
   setCommand "c", projectNimFile
 
-task generateTrainingData, "Builds the special/program.nim with specific flags":
+task generateTrainingData, "Generates training data by playing games":
   highPerformance()
   --passC:"-march=native"
   --passC:"-mtune=native"
