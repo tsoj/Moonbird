@@ -19,7 +19,7 @@ let
   outputFilename = fmt"{outDir}trainingSet_{versionOrId()}_{startDate}.bin"
 
 discard existsOrCreateDir outDir
-doAssert not fileExists outDir, "Can't overwrite existing file"
+doAssert not fileExists outputFilename, "Can't overwrite existing file: " & outputFilename
 
 func isValidSamplePosition(position: Position): bool =
   position.gameStatus == running and position.halfmoveClock < 50
