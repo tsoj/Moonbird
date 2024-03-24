@@ -107,7 +107,6 @@ proc playGame*(game: var Game, printInfo = false): float =
 
       break
 
-
 when isMainModule:
   var game = newGame("x5o/7/2-1-2/7/2-1-2/7/o5x x 0 1".toPosition, maxNodes = 100_000)
   discard game.playGame(printInfo = true)

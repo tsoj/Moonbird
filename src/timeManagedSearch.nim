@@ -7,7 +7,8 @@ type SearchInfo* {.requiresInit.} = object
   hashTable*: ptr HashTable
   targetDepth*: Ply = Ply.high
   movesToGo*: int = int.high
-  increment*, timeLeft*: array[red .. blue, Seconds] = [red: Seconds.high, blue: Seconds.high]
+  increment*, timeLeft*: array[red .. blue, Seconds] =
+    [red: Seconds.high, blue: Seconds.high]
   moveTime*: Seconds = Seconds.high
   nodes*: int = int.high
   eval*: EvaluationFunction = evaluate
@@ -40,7 +41,7 @@ iterator iterativeTimeManagedSearch*(
   const numConsideredBranchingFactors = 4
 
   doAssert searchInfo.positionHistory.len >= 1, "Need at least one position"
-  
+
   let
     position = searchInfo.positionHistory[^1]
     us = position.us
