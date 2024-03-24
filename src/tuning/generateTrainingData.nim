@@ -1,9 +1,4 @@
-import
-  ../position,
-  ../hashTable,
-  ../evaluation,
-  ../positionUtils,
-  ../game
+import ../position, ../hashTable, ../evaluation, ../positionUtils, ../game, ../version
 
 import taskpools
 
@@ -21,7 +16,7 @@ const
 let
   startDate = now().format("yyyy-MM-dd-HH-mm-ss")
   outDir = "res/data/"
-  outputFilename = fmt"{outDir}trainingSet_{startDate}.bin"
+  outputFilename = fmt"{outDir}trainingSet_{versionOrId}_{startDate}.bin"
 
 discard existsOrCreateDir outDir
 doAssert not fileExists outDir, "Can't overwrite existing file"
@@ -70,8 +65,6 @@ echo fmt"{openingSearchNodes.load = }"
 echo fmt"{openingLines.len = }"
 echo fmt"{expectedNumberSamplesPerOpening = }"
 
-# doAssert false
-
 proc findStartPositionsAndPlay(startPos: Position, stringIndex: string) =
   try:
     var
@@ -90,9 +83,6 @@ proc findStartPositionsAndPlay(startPos: Position, stringIndex: string) =
           numSamples += 1
 
           withLock outFileMutex:
-            if (numSamples mod 10_000) == 0:
-              echo "numSamples: ", numSamples
-
             outFileStream.writePosition position
             outFileStream.write gameResult
             outFileStream.flush
@@ -110,7 +100,7 @@ proc findStartPositionsAndPlay(startPos: Position, stringIndex: string) =
     openingSearchNodes.store openingSearchNodes.load *
       clamp(expectedNumberSamplesPerOpening.float / numSamples.float, 0.95, 1.05)
 
-    echo fmt"{openingSearchNodes.load = }"
+    echo fmt"{openingSearchNodes.load.int = }"
   except Exception:
     echo "ERROR: EXCEPTION: ", getCurrentExceptionMsg()
     quit(QuitFailure)
@@ -125,7 +115,6 @@ for i, fen in openingLines:
     stringIndex = fmt"{i+1}/{openingLines.len}"
 
   threadpool.spawn position.findStartPositionsAndPlay(stringIndex)
-  # position.findStartPositionsAndPlay(stringIndex)
 
 threadpool.syncAll()
 
