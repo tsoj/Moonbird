@@ -35,7 +35,7 @@ proc makeNextMove(game: var Game): (GameStatus, Value, Move) =
     )
     (pv, value) = searchInfo.timeManagedSearch()
     absoluteValue =
-      if position.us == blue:
+      if position.us == red:
         value
       else:
         -value
@@ -94,9 +94,9 @@ proc playGame*(game: var Game, printInfo = false): float =
       case gameStatus
       of draw, fiftyMoveRule:
         result = 0.5
-      of winBlue:
-        result = 1.0
       of winRed:
+        result = 1.0
+      of winBlue:
         result = 0.0
       else:
         doAssert false, $gameStatus

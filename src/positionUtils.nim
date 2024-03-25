@@ -1,5 +1,7 @@
 import position, movegen, utils
 
+import std/[strformat]
+
 export position
 
 type GameStatus* = enum
@@ -46,57 +48,56 @@ func gameStatus*(position: Position): GameStatus =
 #   of blocked: "🞓"
 #   else: " "
 
+const
+  fenStrings = [red: "x", blue: "o", blocked: "-", noColor: "1"]
+  prettyStrings = [red: "🏶", blue: "♠", blocked: "🞓", noColor: "?"]
+  colorColor = [red: fgRed, blue: fgBlue, blocked: fgDefault, noColor: fgDefault]
+
+func toColor(s: string or char): Color =
+  case ($s).toLowerAscii.strip
+  of fenStrings[red], "red", "b", "black":
+    red
+  of fenStrings[blue], "blue", "w", "white":
+    blue
+  of fenStrings[blocked]:
+    blocked
+  of fenStrings[noColor], "", ".", "_":
+    noColor
+  else:
+    raise newException(ValueError, "Unrecognized color string: \"" & s & "\"")
 
 func fen*(position: Position): string =
   for rank in countdown(6, 0):
     for file in 0 .. 6:
       let square = (rank * 7 + file).Square
 
-      result &= (
-        case position[square]
-        of red: "o"
-        of blue: "x"
-        of blocked: "-"
-        else: "1"
-      )
+      result &= fenStrings[position[square]]
 
     if rank != 0:
       result &= "/"
 
   for i in countdown(7, 2):
-    result = result.replace(repeat("1", i), $i)
+    result = result.replace(repeat(fenStrings[noColor], i), $i)
 
-  result &= (if position.us == red: " o " else: " x ")
-  result &= $position.halfmoveClock & " " & $(position.halfmovesPlayed div 2)
+  result &=
+    fmt" {fenStrings[position.us]} {position.halfmoveClock} {(position.halfmovesPlayed div 2)}"
 
 func printPosition*(stream: File or Stream, position: Position) =
   stream.printBoardString(
     proc(square: Square): auto =
       let color = position[square]
       if color != noColor:
-        return some(
-          case color
-          of red:
-            ("🏶", fgRed)
-          of blue:
-            ("♠", fgBlue)
-          of blocked:
-            ("🞓", fgDefault)
-          else:
-            ("?", fgDefault)
-        )
+        return some (prettyStrings[color], colorColor[color])
       none (string, ForegroundColor)
   )
 
-  var fenWords = position.fen.splitWhitespace
-
   {.cast(noSideEffect).}:
-    for i in 1 ..< fenWords.len:
-      stream.write fenWords[i], " "
-    stream.write "\n"
     when stream is File:
+      stream.styledWrite resetStyle, colorColor[position.us], prettyStrings[position.us]
+      stream.write &" {position.halfmoveClock} {position.halfmovesPlayed}\n"
       stream.flushFile
     elif stream is Stream:
+      stream.write &"{prettyStrings[position.us]} {position.halfmoveClock} {position.halfmovesPlayed}\n"
       stream.flush
     else:
       doAssert false
@@ -122,7 +123,7 @@ proc toPosition*(fen: string, suppressWarnings = false): Position =
     fenWords.add("0")
 
   for i in 2 .. 7:
-    fenWords[0] = fenWords[0].replace($i, repeat("1", i))
+    fenWords[0] = fenWords[0].replace($i, repeat(fenStrings[noColor], i))
 
   doAssert fenWords.len >= 4
   let
@@ -169,9 +170,9 @@ proc toPosition*(fen: string, suppressWarnings = false): Position =
 
   # active color
   case activeColor.toLowerAscii
-  of "b", "x", "blue", "black":
+  of fenStrings[blue], "blue", "b", "black":
     result.us = blue
-  of "r", "w", "o", "red", "white":
+  of fenStrings[red], "red", "w", "white":
     result.us = red
   else:
     raise newException(
