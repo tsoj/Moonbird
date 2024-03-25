@@ -31,6 +31,22 @@ func gameStatus*(position: Position): GameStatus =
   else:
     running
 
+# TODO
+# func asciiColorString(color: Color): string =
+#   case color
+#   of red: "o"
+#   of blue: "x"
+#   of blocked: "-"
+#   else: " "
+
+# func beatifulColorString(color: Color): string =
+#   case color
+#   of red: "🏶"
+#   of blue: "♠"
+#   of blocked: "🞓"
+#   else: " "
+
+
 func fen*(position: Position): string =
   for rank in countdown(6, 0):
     for file in 0 .. 6:
@@ -72,7 +88,7 @@ func printPosition*(stream: File or Stream, position: Position) =
       none (string, ForegroundColor)
   )
 
-  let fenWords = position.fen.splitWhitespace
+  var fenWords = position.fen.splitWhitespace
 
   {.cast(noSideEffect).}:
     for i in 1 ..< fenWords.len:

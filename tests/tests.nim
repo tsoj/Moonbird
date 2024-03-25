@@ -4,7 +4,8 @@ import
   ../src/move,
   ../src/movegen,
   ../src/version,
-  ../src/game
+  ../src/game,
+  ../src/startPositions
 
 import std/[strformat, terminal, options, random, streams]
 
@@ -144,6 +145,11 @@ proc positionStreams(): Option[string] =
     if position2 != position:
       return some &"Failed to convert to binary stream and back for \"{fen}\""
 
+proc blockerConfigurations(): Option[string] =
+  let blockerConfigurations16 = getBlockerConfigurations(16)
+  if blockerConfigurations16.len != 2868:
+    return some &"Failed to find the right number of blocker configurations: Is {blockerConfigurations16.len}, but should be 2868"
+
 proc runTests*(): bool =
   const tests = [
     (testFen, "FEN parsing"),
@@ -152,6 +158,7 @@ proc runTests*(): bool =
     (testPerft, "Move generation"),
     (testZobristKeys, "Zobrist key calculation"),
     (playGames, "Playing games"),
+    (blockerConfigurations, "Blocker configurations"),
   ]
 
   var failedTests = 0

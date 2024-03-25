@@ -98,7 +98,7 @@ proc findStartPositionsAndPlay(startPos: Position, stringIndex: string) =
     echo fmt"Finished opening {stringIndex}, {numSamples = }"
 
     openingSearchNodes.store openingSearchNodes.load *
-      clamp(expectedNumberSamplesPerOpening.float / numSamples.float, 0.95, 1.05)
+      clamp(expectedNumberSamplesPerOpening.float / numSamples.float, 0.99, 1.01)
 
     echo fmt"{openingSearchNodes.load.int = }"
   except Exception:
