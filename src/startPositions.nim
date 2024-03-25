@@ -1,8 +1,8 @@
-import bitboard
+import bitboard, position, positionUtils, movegen
 
-export bitboard
+export bitboard, position
 
-import std/[sets]
+import std/[sets, tables]
 
 const upperLeftQuadrant =
   (file(a1) or file(b1) or file(c1) or file(d1)) and
@@ -10,6 +10,9 @@ const upperLeftQuadrant =
 
 const startPiecePositions =
   a1.toBitboard or g1.toBitboard or a7.toBitboard or g7.toBitboard
+
+static:
+  doAssert startPiecePositions == startPos.occupancy
 
 func addBlockers(bitboard: Bitboard, howMany: int): seq[Bitboard] =
   if howMany <= 0:
@@ -22,7 +25,9 @@ func getUpperLeftBlockerConfigurations(maxNumBlockers: int): seq[Bitboard] =
   for numBlockers in 0 .. maxNumBlockers:
     result.add 0.addBlockers(numBlockers)
 
-func getBlockerConfigurations*(maxNumBlockers: int): seq[Bitboard] =
+func getBlockerConfigurations*(
+    maxNumBlockers: int, minNumBlockers: int = 0
+): seq[Bitboard] =
   var blockerSet: HashSet[Bitboard]
   # this weird calculation is to make sure that we indeed get all configurations with at most maxNumBlockers blockers
   let maxUpperLeftNum =
@@ -33,15 +38,68 @@ func getBlockerConfigurations*(maxNumBlockers: int): seq[Bitboard] =
     let blockers =
       upperLeft or upperLeft.mirrorHorizontally or upperLeft.mirrorVertically or
       upperLeft.rotate180
-    if blockers.countSetBits <= maxNumBlockers:
+    if blockers.countSetBits in minNumBlockers .. maxNumBlockers:
       if blockers.rotate90 notin blockerSet:
         blockerSet.incl blockers
 
   for b in blockerSet:
     result.add b
 
-# let blockerConfigurations = getBlockerConfigurations(16)
-# for b in blockerConfigurations:
-#   echo b.toString
+func getStartingPositions(
+    minNumPositions: int, maxNumBlockers: int = 16
+): seq[Position] =
+  var startingPositions: Table[int, HashSet[Position]]
 
-# echo blockerConfigurations.len
+  let blockerConfigurations = getBlockerConfigurations(maxNumBlockers = maxNumBlockers)
+
+  for blockerConfig in blockerConfigurations:
+    let num = blockerConfig.countSetBits
+    var pos = startPos
+    doAssert (pos.occupancy and blockerConfig) == 0
+    pos[blocked] = blockerConfig
+    if num notin startingPositions:
+      startingPositions[num] = initHashSet[Position]()
+    startingPositions[num].incl pos
+
+  doAssert startingPositions.len > 0
+
+  let maxSetSize = block:
+    var maxSetSize = 0
+    for (num, s) in startingPositions.pairs:
+      maxSetSize = max(maxSetSize, s.len)
+    maxSetSize
+
+  let targetNumPositionsPerBlockerNum =
+    max(maxSetSize, minNumPositions div startingPositions.len + 1)
+
+  for (num, s) in startingPositions.mpairs:
+    while s.len < targetNumPositionsPerBlockerNum:
+      var newPositions: seq[Position]
+      for pos in s:
+        for move in pos.moves:
+          newPositions.add pos.doMove(move)
+          newPositions[^1].halfmoveClock = startPos.halfmoveClock
+          newPositions[^1].halfmovesPlayed = startPos.halfmovesPlayed
+
+      for pos in newPositions:
+        let
+          numRed = pos[red].countSetBits
+          numBlue = pos[blue].countSetBits
+        if abs(numRed - numBlue) <= max(3, min(numRed, numBlue) div 4) and
+            pos.gameStatus == running:
+          s.incl pos
+          if s.len >= targetNumPositionsPerBlockerNum:
+            break
+
+  for (num, s) in startingPositions.pairs:
+    for pos in s:
+      result.add pos
+
+
+
+when isMainModule:
+  let startPositions = getStartingPositions(100_000)
+
+  for p in startPositions:
+    stdout.printPosition p
+  echo startPositions.len

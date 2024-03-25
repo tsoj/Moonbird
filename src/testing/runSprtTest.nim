@@ -3,6 +3,7 @@ import std/[osproc, strutils]
 const
     mainBranch = "main"
     workingDir = "src/testing/"
+    cuteAtaxxBinary = 
 
 let gitStatus = execProcess("git status")
 
@@ -17,4 +18,4 @@ let
 doAssert currentBranch != mainBranch
 doAssert not gitHasUnstagedChanges
 
-if ""
+# if ""

@@ -95,19 +95,6 @@ func opposite*(color: Color): Color =
 func toSquare*(s: string): Square =
   parseEnum[Square](s)
 
-func toColor*(s: string or char): Color =
-  case ($s).toLowerAscii.strip
-  of "x", "b", "blue", "black":
-    blue
-  of "o", "r", "red", "white":
-    red
-  of "-":
-    blocked
-  of "", ".", "_":
-    noColor
-  else:
-    raise newException(ValueError, "Unrecognized color string: \"" & s & "\"")
-
 func clampToType*[In, Out](x: In, OutType: typedesc[Out]): Out =
   x.clamp(OutType.low.In, OutType.high.In).Out
 
