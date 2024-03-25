@@ -27,6 +27,15 @@ type
 
   ZobristKey* = uint64
 
+func fileNumber*(sq: Square): 0 .. 6 =
+  sq.int mod 7
+
+func rankNumber*(sq: Square): 0 .. 6 =
+  sq.int div 7
+
+func newSquare*(rankNumber: 0 .. 6, fileNumber: 0 .. 6): Square =
+  (fileNumber + rankNumber * 7).Square
+
 template isLeftEdge*(square: Square): bool =
   square.int8 mod 7 == 0
 

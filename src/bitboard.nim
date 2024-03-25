@@ -53,6 +53,32 @@ func rank*(square: Square): Bitboard =
   const rank1 = 0b1111111.Bitboard
   (rank1 shl (7 * (square.int div 7)))
 
+func mirrorHorizontally*(bitboard: Bitboard): Bitboard =
+  for i in 0 .. 3:
+    let
+      f1 = file(i.Square)
+      f2 = file((6 - i).Square)
+      shiftAmount = 6 - 2 * i
+    result |= (bitboard and f1) shl shiftAmount
+    result |= (bitboard and f2) shr shiftAmount
+
+func mirrorVertically*(bitboard: Bitboard): Bitboard =
+  for i in 0 .. 3:
+    let
+      r1 = rank((i * 7).Square)
+      r2 = rank(((6 - i) * 7).Square)
+      shiftAmount = (6 - 2 * i) * 7
+    result |= (bitboard and r1) shl shiftAmount
+    result |= (bitboard and r2) shr shiftAmount
+
+func rotate180*(bitboard: Bitboard): Bitboard =
+  bitboard.mirrorHorizontally.mirrorVertically
+
+func rotate90*(bitboard: Bitboard): Bitboard =
+  for sq in bitboard:
+    result |=
+      newSquare(rankNumber = 6 - sq.fileNumber, fileNumber = sq.rankNumber).toBitboard
+
 func up(bitboard: Bitboard): Bitboard =
   bitboard shl 7
 
