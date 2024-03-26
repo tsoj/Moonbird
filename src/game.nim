@@ -1,7 +1,7 @@
 import position, positionUtils, movegen, timeManagedSearch, evaluation, hashTable
 
 import std/[tables]
-hellloehelleo
+
 type Game* {.requiresInit.} = object
   positionHistory*: seq[Position]
   evals: Table[Position, Value] = initTable[Position, Value]()
