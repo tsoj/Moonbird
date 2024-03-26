@@ -25,10 +25,6 @@ jobs:
       - name: Run tests
         run: |
           cd Moonbird
-          nimble install taskpools@0.0.5
+          nim Moonbird.nims | grep -v "^Hint:" | cut -d' ' -f1 | xargs -I {} nim {} Moonbird.nims
           find . -name *.nim -print0 | xargs -n 1 -0 nim c $1
-          nimble debug
-          nimble profile
-          nimble default
-          nimble native
-          nimble test
+          nim tests --run Moonbird.nims
