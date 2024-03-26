@@ -5,3 +5,4 @@ trainingSet_*.bin
 perf.data*
 generateTrainingData
 nim.cfg
+src/testing/workdir

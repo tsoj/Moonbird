@@ -45,10 +45,10 @@ func getBlockerConfigurations*(
   for b in blockerSet:
     result.add b
 
-func getStartingPositions(
+func getStartPositions*(
     minNumPositions: int, maxNumBlockers: int = 16
 ): seq[Position] =
-  var startingPositions: Table[int, HashSet[Position]]
+  var startPositions: Table[int, HashSet[Position]]
 
   let blockerConfigurations = getBlockerConfigurations(maxNumBlockers = maxNumBlockers)
 
@@ -57,22 +57,22 @@ func getStartingPositions(
     var pos = startPos
     doAssert (pos.occupancy and blockerConfig) == 0
     pos[blocked] = blockerConfig
-    if num notin startingPositions:
-      startingPositions[num] = initHashSet[Position]()
-    startingPositions[num].incl pos
+    if num notin startPositions:
+      startPositions[num] = initHashSet[Position]()
+    startPositions[num].incl pos
 
-  doAssert startingPositions.len > 0
+  doAssert startPositions.len > 0
 
   let maxSetSize = block:
     var maxSetSize = 0
-    for (num, s) in startingPositions.pairs:
+    for (num, s) in startPositions.pairs:
       maxSetSize = max(maxSetSize, s.len)
     maxSetSize
 
   let targetNumPositionsPerBlockerNum =
-    max(maxSetSize, minNumPositions div startingPositions.len + 1)
+    max(maxSetSize, minNumPositions div startPositions.len + 1)
 
-  for (num, s) in startingPositions.mpairs:
+  for (num, s) in startPositions.mpairs:
     while s.len < targetNumPositionsPerBlockerNum:
       var newPositions: seq[Position]
       for pos in s:
@@ -91,14 +91,12 @@ func getStartingPositions(
           if s.len >= targetNumPositionsPerBlockerNum:
             break
 
-  for (num, s) in startingPositions.pairs:
+  for (num, s) in startPositions.pairs:
     for pos in s:
       result.add pos
 
-
-
 when isMainModule:
-  let startPositions = getStartingPositions(100_000)
+  let startPositions = getStartPositions(100_000)
 
   for p in startPositions:
     stdout.printPosition p

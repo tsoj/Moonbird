@@ -49,13 +49,13 @@ proc makeNextMove(game: var Game): (GameStatus, Value, Move) =
   (game.positionHistory[^1].gameStatus, absoluteValue, pv[0])
 
 func newGame*(
-    startingPosition: Position,
+    startPosition: Position,
     maxNodes = 20_000,
     hashTable: ref HashTable = nil,
     evaluation: EvaluationFunction = evaluate,
 ): Game =
   result = Game(
-    positionHistory: @[startingPosition],
+    positionHistory: @[startPosition],
     hashTable: hashTable,
     maxNodes: maxNodes,
     evaluation: evaluation,
@@ -67,11 +67,11 @@ func newGame*(
     result.hashTable[] = newHashTable(len = maxNodes * 2)
 
 proc playGame*(game: var Game, printInfo = false): float =
-  doAssert game.positionHistory.len >= 1, "Need a starting position"
+  doAssert game.positionHistory.len >= 1, "Need a start position"
 
   if printInfo:
     echo "----------------------------"
-    echo "starting position:"
+    echo "start position:"
     stdout.printPosition game.positionHistory[0]
 
   var
