@@ -26,7 +26,7 @@ when "git version" notin staticExec("git --version") or
     "unspecified"
 else:
   const
-    gitHasUnstagedChanges =
+    gitHasUnstagedChanges* =
       "nothing to commit, working tree clean" notin staticExec("git status")
     gitHash = staticExec("git rev-parse HEAD").strip
     gitShortHash = staticExec("git rev-parse --short HEAD").strip
