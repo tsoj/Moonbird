@@ -25,7 +25,7 @@ doAssert not gitHasUnstagedChanges,
 let
   startDate = now().format("yyyy-MM-dd-HH-mm-ss")
   outDir = "res/data/"
-  outputFilename = fmt"{outDir}trainingSet_{versionOrId()}_{startDate}.bin"
+  outputFilename = fmt"{outDir}trainingSet_{startDate}_{versionOrId()}.bin"
 
 discard existsOrCreateDir outDir
 doAssert not fileExists outputFilename,
