@@ -70,17 +70,16 @@ task tests, "Runs tests":
   setBinaryName("tests")
   setCommand "c", "tests/tests.nim"
 
-task generateTrainingData, "Generates training data by playing games":
+task genData, "Generates training data by playing games":
   highPerformance()
   --passC:"-march=native"
   --passC:"-mtune=native"
-  setBinaryName("generateTrainingData")
-  exec("nimble install taskpools@0.0.5")
+  setBinaryName("genData")
   setCommand "c", "src/tuning/generateTrainingData.nim"
 
-task runSprt, "Runs an SPRT test of the current branch against the main branch":
+task sprt, "Runs an SPRT test of the current branch against the main branch":
   --define:release
-  setBinaryName("runSprtTest")
+  setBinaryName("sprt")
   setCommand "c", "src/testing/runSprtTest.nim"
 
 #!fmt: on
