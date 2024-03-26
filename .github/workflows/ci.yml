@@ -25,6 +25,7 @@ jobs:
       - name: Run tests
         run: |
           cd Moonbird
+          nimble install taskpools@0.0.5
           find . -name *.nim -print0 | xargs -n 1 -0 nim c $1
           nimble debug
           nimble profile
