@@ -42,39 +42,49 @@ let
     projectNimFile = "src/Moonbird.nim"
     suffix = if defined(windows): ".exe" else: ""
     binDir = "bin/"
-    name = binDir & projectName() & "-" & version().get(otherwise = "dev")
+    name = projectName() & "-" & version().get(otherwise = "dev")
+
+proc setBinaryName(name: string) =
+  switch("o", binDir & name & suffix)
 
 task debug, "debug compile":
   --define:debug
   --passC:"-O2"
   fullDebuggerInfo()
-  switch("o", name & "-debug" & suffix)
+  setBinaryName(name & "-debug")
   setCommand "c", projectNimFile
 
 task profile, "profile compile":
   highPerformance()
   fullDebuggerInfo()
-  switch("o", name & "-profile" & suffix)
+  setBinaryName(name & "-profile")
   setCommand "c", projectNimFile
 
 task default, "default compile":
   lightDebuggerInfo()
   highPerformance()
-  switch("o", name & suffix)
+  setBinaryName(name)
   setCommand "c", projectNimFile
 
 task native, "native compile":
   highPerformance()
   --passC:"-march=native"
   --passC:"-mtune=native"
-  switch("o", name & "-native" & suffix)
+  setBinaryName(name & "-native")
   setCommand "c", projectNimFile
 
 task generateTrainingData, "Generates training data by playing games":
   highPerformance()
   --passC:"-march=native"
   --passC:"-mtune=native"
-  switch("o", binDir & "generateTrainingData" & suffix)
+  --run
+  setBinaryName("generateTrainingData")
   setCommand "c", "src/tuning/generateTrainingData.nim"
+
+task runSprt, "Runs an SPRT test of the current branch against the main branch":
+  --define:release
+  --run
+  setBinaryName("runSprtTest")
+  setCommand "c", "src/testing/runSprtTest.nim"
 
 #!fmt: on
