@@ -27,7 +27,7 @@ func isValidSamplePosition(position: Position): bool =
 
 proc playGame(startPos: Position, hashTable: ref HashTable): float =
   var game = newGame(
-    startingPosition = startPos, maxNodes = sampleGameSearchNodes, hashTable = hashTable
+    startPosition = startPos, maxNodes = sampleGameSearchNodes, hashTable = hashTable
   )
   let gameResult = game.playGame # (printInfo = true)
   doAssert gameResult in 0.0 .. 1.0
@@ -88,7 +88,7 @@ proc findStartPositionsAndPlay(startPos: Position, stringIndex: string) =
             outFileStream.flush
 
     var game = newGame(
-      startingPosition = startPos,
+      startPosition = startPos,
       maxNodes = openingSearchNodes.load.int,
       hashTable = nil,
       evaluation = specialEval,

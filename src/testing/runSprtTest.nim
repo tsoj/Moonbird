@@ -1,9 +1,15 @@
-import std/[osproc, strutils]
+import ../startPositions, ../positionUtils
+
+import std/[osproc, os, strutils, strformat, random, json]
 
 const
-    mainBranch = "main"
-    workingDir = "src/testing/"
-    cuteAtaxxBinary = 
+  mainBranch = "main"
+  workDir = "src/testing/workdir/"
+  cuteAtaxxBinary = "../cuteataxx/build/cuteataxx-cli"
+  moonbirdBinaryFile = "bin/Moonbird-dev-native"
+  fenFileName = workDir & "startpos.txt"
+  cuteataxxSettingsFileName = workDir & "cuteataxxSettings.json"
+  timeControlMilliseconds = 10_000
 
 let gitStatus = execProcess("git status")
 
@@ -13,9 +19,69 @@ doAssert "On branch" in gitStatus
 
 let
   gitHasUnstagedChanges = "nothing to commit, working tree clean" notin gitStatus
-  currentBranch = execProcess("git rev-parse --abbrev-ref HEAD")
+  currentBranch = execProcess("git rev-parse --abbrev-ref HEAD").strip
 
 doAssert currentBranch != mainBranch
 doAssert not gitHasUnstagedChanges
 
-# if ""
+discard existsOrCreateDir workDir
+
+proc moonbirdBinary(branch: string): string =
+  fmt"{getCurrentDir()}/{workDir}Moonbird-{branch}"
+
+for branch in [mainBranch, currentBranch]:
+  discard tryRemoveFile moonbirdBinaryFile
+  doAssert execCmd("git switch " & branch) == 0
+  doAssert execCmd("nimble native") == 0
+  copyFileWithPermissions moonbirdBinaryFile, moonbirdBinary(branch)
+
+var positions = getStartPositions(100, 4)
+positions.shuffle
+let fenFile = open(fenFileName, fmWrite)
+for position in positions:
+  fenFile.writeLine position.fen
+fenFile.close()
+
+let cuteataxxSettings =
+  %*{
+    "games": 100_000,
+    "concurrency": max(1, countProcessors() - 2),
+    "ratinginterval": 100,
+    "verbose": false,
+    "debug": false,
+    "recover": false,
+    "colour1": "Red",
+    "colour2": "Blue",
+    "tournament": "roundrobin",
+    "print_early": true,
+    "adjudicate":
+      {"gamelength": 300, "material": 30, "easyfill": true, "timeout_buffer": 25},
+    "openings": {"path": fenFileName, "repeat": true, "shuffle": true},
+    "timecontrol":
+      {"time": timeControlMilliseconds, "inc": timeControlMilliseconds div 100},
+    "options": {"debug": "false", "threads": "1", "hash": "64", "ownbook": "false"},
+    "sprt":
+      {"enabled": true, "autostop": true, "elo0": 0.0, "elo1": 5.0, "confidence": 0.95},
+    "pgn": {
+      "enabled": true,
+      "verbose": true,
+      "override": false,
+      "path": workDir & "games.pgn",
+      "event": "Testing Moonbird",
+    },
+    "engines": [
+      {
+        "name": "Moonbird-" & mainBranch,
+        "path": moonbirdBinary(mainBranch),
+        "protocol": "UAI",
+      },
+      {
+        "name": "Moonbird-" & currentBranch,
+        "path": moonbirdBinary(currentBranch),
+        "protocol": "UAI",
+      },
+    ],
+  }
+
+writeFile(cuteataxxSettingsFileName, cuteataxxSettings.pretty)
+doAssert execCmd(cuteAtaxxBinary & " " & cuteataxxSettingsFileName) == 0
