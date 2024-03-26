@@ -10,6 +10,7 @@ const
   fenFileName = workDir & "startpos.txt"
   cuteataxxSettingsFileName = workDir & "cuteataxxSettings.json"
   timeControlMilliseconds = 10_000
+  maxNumGames = 100_000
 
 let gitStatus = execProcess("git status")
 
@@ -21,8 +22,19 @@ let
   gitHasUnstagedChanges = "nothing to commit, working tree clean" notin gitStatus
   currentBranch = execProcess("git rev-parse --abbrev-ref HEAD").strip
 
-doAssert currentBranch != mainBranch
-doAssert not gitHasUnstagedChanges
+# doAssert not gitHasUnstagedChanges
+
+if currentBranch == mainBranch:
+  while true:
+    stdout.write "You are about to test the main branch against itself. Are you sure you want to do this? [y/n] "
+    stdout.flushFile
+    let answer = readLine(stdin).strip.toLowerAscii
+    if answer == "y":
+      break
+    if answer == "n":
+      quit(QuitFailure)
+
+
 
 discard existsOrCreateDir workDir
 
@@ -35,7 +47,7 @@ for branch in [mainBranch, currentBranch]:
   doAssert execCmd("nimble native") == 0
   copyFileWithPermissions moonbirdBinaryFile, moonbirdBinary(branch)
 
-var positions = getStartPositions(100, 4)
+var positions = getStartPositions(maxNumGames)
 positions.shuffle
 let fenFile = open(fenFileName, fmWrite)
 for position in positions:
@@ -71,17 +83,19 @@ let cuteataxxSettings =
     },
     "engines": [
       {
-        "name": "Moonbird-" & mainBranch,
-        "path": moonbirdBinary(mainBranch),
-        "protocol": "UAI",
-      },
-      {
         "name": "Moonbird-" & currentBranch,
         "path": moonbirdBinary(currentBranch),
         "protocol": "UAI",
       },
+      {
+        "name": "Moonbird-" & mainBranch,
+        "path": moonbirdBinary(mainBranch),
+        "protocol": "UAI",
+      }
     ],
   }
 
 writeFile(cuteataxxSettingsFileName, cuteataxxSettings.pretty)
 doAssert execCmd(cuteAtaxxBinary & " " & cuteataxxSettingsFileName) == 0
+
+echo "Finished SPRT test"

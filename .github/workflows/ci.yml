@@ -25,6 +25,9 @@ jobs:
       - name: Run tests
         run: |
           cd Moonbird
+          find . -type f -name "*.nim" -exec nim c {} \;
           nimble debug
+          nimble profile
           nimble default
+          nimble native
           nimble test
