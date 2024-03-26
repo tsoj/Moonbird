@@ -45,9 +45,7 @@ func getBlockerConfigurations*(
   for b in blockerSet:
     result.add b
 
-func getStartPositions*(
-    minNumPositions: int, maxNumBlockers: int = 16
-): seq[Position] =
+func getStartPositions*(minNumPositions: int, maxNumBlockers: int = 16): seq[Position] =
   var startPositions: Table[int, HashSet[Position]]
 
   let blockerConfigurations = getBlockerConfigurations(maxNumBlockers = maxNumBlockers)

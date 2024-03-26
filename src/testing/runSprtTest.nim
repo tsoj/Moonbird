@@ -22,7 +22,7 @@ let
   gitHasUnstagedChanges = "nothing to commit, working tree clean" notin gitStatus
   currentBranch = execProcess("git rev-parse --abbrev-ref HEAD").strip
 
-# doAssert not gitHasUnstagedChanges
+doAssert not gitHasUnstagedChanges, "Shouldn't do SPRT with unstaged changes"
 
 if currentBranch == mainBranch:
   while true:
@@ -33,8 +33,6 @@ if currentBranch == mainBranch:
       break
     if answer == "n":
       quit(QuitFailure)
-
-
 
 discard existsOrCreateDir workDir
 
@@ -91,7 +89,7 @@ let cuteataxxSettings =
         "name": "Moonbird-" & mainBranch,
         "path": moonbirdBinary(mainBranch),
         "protocol": "UAI",
-      }
+      },
     ],
   }
 
