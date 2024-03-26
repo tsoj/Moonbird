@@ -1,14 +1,5 @@
 import src/version
 
-# Package
-author = "Jost Triller"
-description = "An Ataxx engine"
-license = "MIT"
-
-# Dependencies
-requires "nim >= 2.1.1"
-taskRequires "generateTrainingData", "taskpools >= 0.0.5"
-
 #!fmt: off
 
 # Default flags
@@ -73,17 +64,22 @@ task native, "native compile":
   setBinaryName(name & "-native")
   setCommand "c", projectNimFile
 
+task tests, "Runs tests":
+  --define:release
+  fullDebuggerInfo()
+  setBinaryName("tests")
+  setCommand "c", "tests/tests.nim"
+
 task generateTrainingData, "Generates training data by playing games":
   highPerformance()
   --passC:"-march=native"
   --passC:"-mtune=native"
-  --run
   setBinaryName("generateTrainingData")
+  exec("nimble install taskpools@0.0.5")
   setCommand "c", "src/tuning/generateTrainingData.nim"
 
 task runSprt, "Runs an SPRT test of the current branch against the main branch":
   --define:release
-  --run
   setBinaryName("runSprtTest")
   setCommand "c", "src/testing/runSprtTest.nim"
 
