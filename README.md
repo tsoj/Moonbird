@@ -6,14 +6,28 @@
 ┛ ┗┗┛┗┛┛┗┗┛┗┛ ┗┻━━━━>━>━─┄┈
 ```
 
-### Compile
-
-**Compiling for native CPU**
+### Compiling for native CPU
 ```shell
-nimble native
+nim native Moonbird
 ```
 
-**Compiling for generic CPUs**
+### Compiling for generic CPUs
 ```shell
-nimble default
+nim default Moonbird
+```
+
+### Run training data generation
+```shell
+nimble install taskpools@0.0.5
+nim genData --run Moonbird
+```
+
+### Run SPRT
+```shell
+nim sprt --run Moonbird
+```
+
+### Run tests
+```shell
+nim tests --run Moonbird
 ```
