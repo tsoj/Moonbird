@@ -26,5 +26,4 @@ jobs:
         run: |
           cd Moonbird
           nim Moonbird.nims | grep -v "^Hint:" | cut -d' ' -f1 | xargs -I {} nim {} Moonbird.nims
-          find . -name *.nim -print0 | xargs -n 1 -0 nim c $1
           nim tests --run Moonbird.nims
