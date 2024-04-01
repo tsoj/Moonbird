@@ -63,7 +63,7 @@ proc setPosition(uaiState: var UaiState, params: seq[string]) =
     history: seq[Position]
 
   if params.len >= 1 and params[0] == "startpos":
-    history = @[startpos]
+    history = @[startPos]
     index = 1
   elif params.len >= 1 and params[0] == "fen":
     var fen: string
@@ -141,7 +141,7 @@ proc perft(uaiState: UaiState, params: seq[string]) =
     echo "Missing depth parameter"
 
 proc uaiLoop*() =
-  var uaiState = UaiState(history: @[startpos], hashtable: newHashTable())
+  var uaiState = UaiState(history: @[startPos], hashtable: newHashTable())
   uaiState.hashTable.setByteSize(sizeInBytes = defaultHashSizeMB * megaByteToByte)
 
   while true:

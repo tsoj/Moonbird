@@ -14,6 +14,8 @@ when "git version" notin staticExec("git --version") or
     debugEcho "git --version: ",
       staticExec("git --version"), "\ngit status: ", staticExec("git status")
 
+  const gitHasUnstagedChanges* = false
+
   func version*(): Option[string] =
     none(string)
 

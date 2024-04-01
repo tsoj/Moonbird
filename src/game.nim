@@ -52,7 +52,7 @@ func newGame*(
     startPosition: Position,
     maxNodes = 20_000,
     hashTable: ref HashTable = nil,
-    evaluation: EvaluationFunction = evaluate,
+    evaluation: EvaluationFunction = perspectiveEvaluate,
 ): Game =
   result = Game(
     positionHistory: @[startPosition],
@@ -73,11 +73,6 @@ proc playGame*(game: var Game, printInfo = false): float =
     echo "----------------------------"
     echo "start position:"
     stdout.printPosition game.positionHistory[0]
-
-  var
-    drawPlies = 0
-    whiteResignPlies = 0
-    blackResignPlies = 0
 
   while true:
     let (gameStatus, value, move) = game.makeNextMove()

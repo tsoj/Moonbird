@@ -80,7 +80,7 @@ proc findStartPositionsAndPlay(startPos: Position, stringIndex: string) =
     sampleGameHashTable[] = newHashTable(len = sampleGameSearchNodes * 2)
 
     func specialEval(position: Position): Value =
-      result = position.evaluate
+      result = position.perspectiveEvaluate
       {.cast(noSideEffect).}:
         if rg.rand(1.0) <= randRatio and position.isValidSamplePosition:
           let gameResult = position.playGame(sampleGameHashTable)
