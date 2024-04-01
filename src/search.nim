@@ -62,9 +62,7 @@ func search(
   ):
     return 0.Value
 
-  let
-    us = position.us
-    hashResult = state.hashTable[].get(position.zobristKey)
+  let hashResult = state.hashTable[].get(position.zobristKey)
 
   var
     alpha = alpha

@@ -8,7 +8,7 @@ type Position* = object
   pieces*: array[red .. blocked, Bitboard]
   us*: Color
   halfmoveClock*, halfmovesPlayed*: int
-  zobristKey*: Zobristkey
+  zobristKey*: ZobristKey
 
 func `[]`*(position: Position, color: Color): Bitboard {.inline.} =
   position.pieces[color]

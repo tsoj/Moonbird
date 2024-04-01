@@ -11,7 +11,7 @@ type SearchInfo* {.requiresInit.} = object
     [red: Seconds.high, blue: Seconds.high]
   moveTime*: Seconds = Seconds.high
   nodes*: int = int.high
-  eval*: EvaluationFunction = evaluate
+  eval*: EvaluationFunction = perspectiveEvaluate
 
 type MoveTime = object
   maxTime, approxTime: Seconds

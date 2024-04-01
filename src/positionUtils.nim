@@ -198,7 +198,7 @@ proc toPosition*(fen: string, suppressWarnings = false): Position =
 
   result.zobristKey = result.calculateZobristKey
 
-const startpos* = "x5o/7/7/7/7/7/o5x x 0 1".toPosition
+const startPos* = "x5o/7/7/7/7/7/o5x x 0 1".toPosition
 
 proc writePosition*(stream: Stream, position: Position) =
   for b in position.pieces:
