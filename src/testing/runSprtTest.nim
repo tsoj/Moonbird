@@ -15,11 +15,13 @@ const
 let gitStatus = execProcess("git status")
 
 doAssert "git version" in execProcess("git --version")
+doAssert execProcess("git rev-parse --is-inside-work-tree").strip == "true"
+
+doAssert "git version" in execProcess("git --version")
 doAssert "not a git repository" notin gitStatus
-doAssert "On branch" in gitStatus
 
 let
-  gitHasUnstagedChanges = "nothing to commit, working tree clean" notin gitStatus
+  gitHasUnstagedChanges = execProcess("git status -suno").strip != ""
   currentBranch = execProcess("git rev-parse --abbrev-ref HEAD").strip
 
 doAssert not gitHasUnstagedChanges, "Shouldn't do SPRT with unstaged changes"

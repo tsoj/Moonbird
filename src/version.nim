@@ -8,7 +8,7 @@ func compileYear*(): string =
   CompileDate.split('-')[0]
 
 when "git version" notin staticExec("git --version") or
-    "not a git repository" in staticExec("git status"):
+    staticExec("git rev-parse --is-inside-work-tree").strip != "true":
   static:
     debugEcho "WARNING: Git not available or not a git repo"
     debugEcho "git --version: ",
@@ -28,8 +28,7 @@ when "git version" notin staticExec("git --version") or
     "unspecified"
 else:
   const
-    gitHasUnstagedChanges* =
-      "nothing to commit, working tree clean" notin staticExec("git status")
+    gitHasUnstagedChanges* = staticExec("git status -suno").strip != ""
     gitHash = staticExec("git rev-parse HEAD").strip
     gitShortHash = staticExec("git rev-parse --short HEAD").strip
     gitTag = staticExec("git tag --points-at HEAD").strip
