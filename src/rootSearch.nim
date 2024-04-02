@@ -4,6 +4,7 @@ import
 
 import std/[strformat]
 
+# TODO remove catching errors here, as we don't use threads for search here
 func launchSearch(position: Position, state: var SearchState, depth: Ply): int =
   try:
     position.search(state, depth = depth)

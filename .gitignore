@@ -1,5 +1,7 @@
 bin
 res/data
+res/params
+!res/params/default.bin
 tests/tests
 trainingSet_*.bin
 perf.data*
