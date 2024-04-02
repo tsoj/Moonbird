@@ -108,14 +108,13 @@ proc toEvalParams*(s: string): EvalParams =
 
 const defaultEvalParams* = block:
   var e: EvalParams
-  e.setAll 100.0
 
-  # const fileName = "res/params/default.bin"
-  # if fileExists fileName:
-  #   # For some reason staticRead starts relative paths at the source file location
-  #   e = staticRead("../" & fileName).toEvalParams
-  # else:
-  #   echo "WARNING! Couldn't find default eval params at ", fileName
+  const fileName = "res/params/default.bin"
+  if fileExists fileName:
+    # For some reason staticRead starts relative paths at the source file location
+    e = staticRead("../" & fileName).toEvalParams
+  else:
+    echo "WARNING! Couldn't find default eval params at ", fileName
   e
 
 echo defaultEvalParams

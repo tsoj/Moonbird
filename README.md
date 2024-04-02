@@ -27,6 +27,11 @@ nim genData --run Moonbird
 nim sprt --run Moonbird
 ```
 
+### Tune eval parameters
+```shell
+nim tuneEvalParams --run Moonbird
+```
+
 ### Run tests
 ```shell
 nim tests --run Moonbird
