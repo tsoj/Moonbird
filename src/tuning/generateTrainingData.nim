@@ -11,12 +11,15 @@ import taskpools
 
 import std/[os, random, locks, atomics, streams, strformat, times, cpuinfo, strutils]
 
-doAssert commandLineParams().len == 1, "Need targetTrainingSamples as parameter"
+doAssert commandLineParams().len == 3,
+  "Need the following parameters in that order (int, int, bool): sampleGameSearchNodes targetTrainingSamples useOnlyHalfCPU"
 
-let targetTrainingSamples = commandLineParams()[0].parseInt
+let
+  sampleGameSearchNodes = commandLineParams()[0].parseInt
+  targetTrainingSamples = commandLineParams()[1].parseInt
+  useOnlyHalfCPU = commandLineParams()[2].parseBool
 
 const
-  sampleGameSearchNodes = 6_000
   randRatio = 0.0005
   minNumStartPositions = 1000
   # We need a minimum number of start positions, as otherwise it's difficult to adjust the number
@@ -28,7 +31,16 @@ doAssert not gitHasUnstagedChanges,
 let
   startDate = now().format("yyyy-MM-dd-HH-mm-ss")
   outDir = "res/data/"
-  outputFilename = fmt"{outDir}trainingSet_{startDate}_{versionOrId()}.bin"
+  outputFilename =
+    fmt"{outDir}trainingSet_{startDate}_{sampleGameSearchNodes}_{versionOrId()}.bin"
+  numThreads = max(
+    1,
+    if useOnlyHalfCPU:
+      countProcessors() div 2
+    else:
+      countProcessors() - 2
+    ,
+  )
 
 discard existsOrCreateDir outDir
 doAssert not fileExists outputFilename,
@@ -68,7 +80,9 @@ openingSearchNodes.store(
     (expectedNumPliesPerGame.float * randRatio * openingPositions.len.float)
 )
 
+echo fmt"{numThreads = }"
 echo fmt"{targetTrainingSamples = }"
+echo fmt"{sampleGameSearchNodes = }"
 echo fmt"{openingSearchNodes.load = }"
 echo fmt"{openingPositions.len = }"
 echo fmt"{expectedNumberSamplesPerOpening = }"
@@ -115,7 +129,7 @@ proc findStartPositionsAndPlay(startPos: Position, stringIndex: string) =
 
 let startTime = now()
 
-var threadpool = Taskpool.new(numThreads = 30) #countProcessors() div 2)#
+var threadpool = Taskpool.new(numThreads = numThreads)
 
 for i, position in openingPositions:
   let stringIndex = fmt"{i+1}/{openingPositions.len}"
