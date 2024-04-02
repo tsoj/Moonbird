@@ -81,7 +81,8 @@ func search(
 
     # stop search if we exceeded maximum nodes or we got a stop signal from outside
     if state.shouldStop:
-      break
+      return # TODO break
+      #break
 
     # search new position
     var value =

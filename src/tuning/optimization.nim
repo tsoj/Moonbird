@@ -64,7 +64,7 @@ let
 
 createDir outDir
 
-ep.writeEvalParams(fileName)
+writeFile fileName, ep.toString
 echo "filename: ", fileName
 
 echo "Total time: ", now() - startTime
