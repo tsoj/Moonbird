@@ -105,13 +105,13 @@ proc go(uaiState: var UaiState, params: seq[string]) =
       of "movestogo":
         searchInfo.movesToGo = params[i + 1].parseInt.int16
       of "winc":
-        searchInfo.increment[red] = Seconds(params[i + 1].parseFloat / 1000.0)
-      of "binc":
         searchInfo.increment[blue] = Seconds(params[i + 1].parseFloat / 1000.0)
+      of "binc":
+        searchInfo.increment[red] = Seconds(params[i + 1].parseFloat / 1000.0)
       of "wtime":
-        searchInfo.timeLeft[red] = Seconds(params[i + 1].parseFloat / 1000.0)
-      of "btime":
         searchInfo.timeLeft[blue] = Seconds(params[i + 1].parseFloat / 1000.0)
+      of "btime":
+        searchInfo.timeLeft[red] = Seconds(params[i + 1].parseFloat / 1000.0)
       of "movetime":
         searchInfo.moveTime = Seconds(params[i + 1].parseFloat / 1000.0)
       of "nodes":

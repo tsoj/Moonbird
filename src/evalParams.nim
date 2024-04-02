@@ -1,6 +1,6 @@
 import types
 
-import std/[streams, os]
+import std/[os, random]
 
 export types
 
@@ -53,75 +53,69 @@ func `*=`*(a: var EvalParams, b: ParamValue) =
     ,
   )
 
-proc writeEvalParams*(stream: Stream, evalParams: EvalParams) =
-  var params = evalParams
+func setAll*(a: var EvalParams, b: ParamValue) =
   doForAll(
-    params,
-    params,
+    a,
+    a,
+    proc(x: var ParamValue, y: ParamValue) =
+      x = b
+    ,
+  )
+  
+proc setRandom*(a: var EvalParams, b: Slice[float64]) =
+  doForAll(
+    a,
+    a,
     proc(x: var ParamValue, y: ParamValue) =
       {.cast(noSideEffect).}:
-        stream.write x.float64
+        x = rand(b).ParamValue
     ,
   )
 
-proc readEvalParams*(stream: Stream): EvalParams =
-  doAssert not isNil stream
-  var params: EvalParams
+const charWidth = 8
+
+proc toString*(evalParams: EvalParams): string =
+  var
+    s: string
+    params = evalParams
 
   proc op(x: var ParamValue, y: ParamValue) =
-    {.cast(noSideEffect).}:
-      discard
-      x = stream.readFloat64().ParamValue
+    for i in 0 ..< sizeof(float64):
+      let
+        shift = charWidth * i
+        bits = cast[char]((cast[uint64](x.float64) shr shift) and 0b1111_1111)
+      s.add bits
+
+  doForAll(params, params, op)
+  s
+
+proc toEvalParams*(s: string): EvalParams =
+  var
+    params: EvalParams
+    i = 0
+
+  proc op(x: var ParamValue, y: ParamValue) =
+    var bits: uint64 = 0
+    for n in 0 ..< sizeof(float64):
+      let shift = charWidth * i
+      bits = bits or (cast[uint64](cast[uint8](s[i])) shl shift)
+      i += 1
+    x = cast[float64](bits)
 
   doForAll(params, params, op)
 
-proc writeEvalParams*(evalParams: EvalParams, fileName: string) =
-  var strm = newFileStream(fileName, fmWrite)
-  if isNil(strm):
-    raise newException(IOError, "Couldn't open file: " & fileName)
-  strm.writeEvalParams evalParams
-  strm.close
-
-# proc readEvalParams*(fileName: string): EvalParams =
-#   let strm = newFileStream(fileName, fmRead)
-#   if isNil(strm):
-#     raise newException(IOError, "Couldn't open file: " & fileName)
-#   result = strm.readEvalParams
-#   strm.close
-
-# proc staticReadEvalParams*(fileName: string): EvalParams =
-#   # staticRead(fileName)
-#   let strm = newStringStream("hellleioj")
-#   strm.setPosition 0
-#   let a = strm.readFloat64
-#   debugEcho a
-#   # if isNil(strm):
-#   #   raise newException(IOError, "Couldn't open static stream for: " & fileName)
-#   # result = strm.readEvalParams
-#   strm.close
+  params
 
 const defaultEvalParams* = block:
   var e: EvalParams
-  doForAll(
-    e,
-    e,
-    proc(x: var ParamValue, y: ParamValue) =
-      x = 1.0
-    ,
-  )
+  e.setAll 100.0
 
-  # const fileName = "default.bin" #"res/params/default.bin"
+  # const fileName = "res/params/default.bin"
   # if fileExists fileName:
-  #   e = staticReadEvalParams fileName
+  #   # For some reason staticRead starts relative paths at the source file location
+  #   e = staticRead("../" & fileName).toEvalParams
   # else:
   #   echo "WARNING! Couldn't find default eval params at ", fileName
   e
 
-
-#import std/streams
-
-const hello = block:
-  let strm = newStringStream("12345678")
-  strm.readFloat64
-
-echo hello
+echo defaultEvalParams

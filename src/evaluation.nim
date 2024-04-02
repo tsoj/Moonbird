@@ -47,10 +47,11 @@ func absoluteEvaluate*(position: Position): Value =
   defaultEvalParams.absoluteEvaluate(position)
 
 func perspectiveEvaluate*(position: Position): Value =
-  result = position.absoluteEvaluate
-  if position.us == blue:
-    result = -result
-  # Value(position[position.us].countSetBits - position[position.enemy].countSetBits) * 100
+  # result = position.absoluteEvaluate
+  # if position.us == blue:
+  #   result = -result
+
+  Value(position[position.us].countSetBits - position[position.enemy].countSetBits) * 100
   # Times 100 because we want centipawn values
 
 # let pos = startPos.doMove(Move(source: f1, target: f1))#.doMove(Move(source: a1, target: c1))
