@@ -1,36 +1,33 @@
 import move, position, movegen
 
 iterator moveIterator*(position: Position, tryFirstMove = noMove): Move =
-  # if tryFirstMove.isLegal(position):
-  #   yield tryFirstMove
+  if tryFirstMove.isLegal(position):
+    yield tryFirstMove
 
   let moves = position.moves
 
   assert moves.len >= 1
 
+  var movePriorities = newSeqOfCap[float](moves.len)
+
   for move in moves:
-    yield move
+    movePriorities.add move.pieceDelta(position).float
 
-  # var movePriorities = newSeqOfCap[float](moves.len)
+    if move == tryFirstMove:
+      movePriorities[^1] = float.low
 
-  # for move in moves:
-  #   movePriorities.add move.pieceDelta(position).float
+  while true:
+    var
+      bestValue = float.low
+      bestIndex = -1
 
-  #   if move == tryFirstMove:
-  #     movePriorities[^1] = float.low
+    for i, priority in movePriorities:
+      if priority > bestValue:
+        bestValue = priority
+        bestIndex = i
 
-  # while true:
-  #   var
-  #     bestValue = float.low
-  #     bestIndex = -1
+    if bestIndex == -1:
+      break
 
-  #   for i, priority in movePriorities:
-  #     if priority > bestValue:
-  #       bestValue = priority
-  #       bestIndex = i
-
-  #   if bestIndex == -1:
-  #     break
-
-  #   movePriorities[bestIndex] = float.low
-  #   yield moves[bestIndex]
+    movePriorities[bestIndex] = float.low
+    yield moves[bestIndex]
