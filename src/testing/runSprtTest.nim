@@ -39,11 +39,18 @@ discard existsOrCreateDir workDir
 proc moonbirdBinary(branch: string): string =
   fmt"{getCurrentDir()}/{workDir}Moonbird-{branch}"
 
-for branch in [mainBranch, currentBranch]:
-  discard tryRemoveFile moonbirdBinaryFile
-  doAssert execCmd("git switch " & branch) == 0
-  doAssert execCmd("nimble native") == 0
-  copyFileWithPermissions moonbirdBinaryFile, moonbirdBinary(branch)
+try:
+  for branch in [mainBranch, currentBranch]:
+    discard tryRemoveFile moonbirdBinaryFile
+    if execCmd("git switch " & branch) != 0:
+      raise newException(CatchableError, "Failed to switch to branch " & branch)
+    if execCmd("nim native Moonbird") != 0:
+      raise newException(
+        CatchableError, "Failed to compile Moonbird binary for branch " & branch
+      )
+    copyFileWithPermissions moonbirdBinaryFile, moonbirdBinary(branch)
+finally:
+  doAssert execCmd("git switch " & currentBranch) == 0
 
 var positions = getStartPositions(maxNumGames)
 positions.shuffle
