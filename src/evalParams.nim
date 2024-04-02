@@ -61,7 +61,7 @@ func setAll*(a: var EvalParams, b: ParamValue) =
       x = b
     ,
   )
-  
+
 proc setRandom*(a: var EvalParams, b: Slice[float64]) =
   doForAll(
     a,
@@ -107,14 +107,19 @@ proc toEvalParams*(s: string): EvalParams =
   params
 
 const defaultEvalParams* = block:
-  var e: EvalParams
+  var ep: EvalParams
 
   const fileName = "res/params/default.bin"
   if fileExists fileName:
     # For some reason staticRead starts relative paths at the source file location
-    e = staticRead("../" & fileName).toEvalParams
+    let s = staticRead("../" & fileName)
+    if s.len == ep.toString.len:
+      ep = s.toEvalParams
+    else:
+      echo "WARNING! Incompatible params format: ", fileName
   else:
     echo "WARNING! Couldn't find default eval params at ", fileName
-  e
+
+  ep
 
 echo defaultEvalParams
