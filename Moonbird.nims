@@ -5,7 +5,7 @@ import src/version
 # Default flags
 --mm:arc
 --define:useMalloc
---passL:"-static"
+# --passL:"-static"
 --cc:clang
 --threads:on
 --styleCheck:hint
