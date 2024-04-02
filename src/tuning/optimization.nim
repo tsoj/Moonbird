@@ -42,9 +42,7 @@ proc optimize(
 let startTime = now()
 
 var data: seq[Entry]
-data.loadData "res/data/trainingSet_2024-03-24-03-09-26_1bd6ffe.bin"
-# data.loadData "res/data/trainingSet_2024-03-24-03-57-45_63225f3.bin"
-# data.loadData "res/data/trainingSet_2024-03-26-02-25-05_766cce2.bin"
+data.loadData "res/data/trainingSet_2024-03-26-02-25-05_766cce2.bin"
 data.shuffle
 
 echo "Total number of entries: ", data.len
