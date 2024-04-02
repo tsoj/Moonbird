@@ -19,7 +19,8 @@ nim default Moonbird
 ### Run training data generation
 ```shell
 nimble install taskpools@0.0.5
-nim genData --run Moonbird
+# The first argument ("1_000_000") is the target number of training samples
+nim genData --run Moonbird 100_000_000
 ```
 
 ### Run SPRT

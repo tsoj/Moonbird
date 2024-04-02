@@ -9,10 +9,13 @@ import
 
 import taskpools
 
-import std/[os, random, locks, atomics, streams, strformat, times, cpuinfo]
+import std/[os, random, locks, atomics, streams, strformat, times, cpuinfo, strutils]
+
+doAssert commandLineParams().len == 1, "Need targetTrainingSamples as parameter"
+
+let targetTrainingSamples = commandLineParams()[0].parseInt
 
 const
-  targetTrainingSamples = 10_000_000
   sampleGameSearchNodes = 6_000
   randRatio = 0.0005
   minNumStartPositions = 1000
@@ -65,6 +68,7 @@ openingSearchNodes.store(
     (expectedNumPliesPerGame.float * randRatio * openingPositions.len.float)
 )
 
+echo fmt"{targetTrainingSamples = }"
 echo fmt"{openingSearchNodes.load = }"
 echo fmt"{openingPositions.len = }"
 echo fmt"{expectedNumberSamplesPerOpening = }"
