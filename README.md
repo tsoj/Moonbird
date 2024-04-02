@@ -34,5 +34,5 @@ nim tuneEvalParams --run Moonbird
 
 ### Run tests
 ```shell
-nim tests --run Moonbird
+./run_tests.sh
 ```
