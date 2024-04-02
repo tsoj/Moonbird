@@ -1,5 +1,7 @@
 import types
 
+import std/[streams, os]
+
 export types
 
 type
@@ -10,8 +12,8 @@ type
 func doForAll[T](
     output: var T,
     input: T,
-    operation: proc(a: var ParamValue, b: ParamValue) {.noSideEffect, raises: [].},
-) {.raises: [].} =
+    operation: proc(a: var ParamValue, b: ParamValue) {.noSideEffect.},
+) =
   when T is ParamValue:
     operation(output, input)
   elif T is object:
@@ -51,6 +53,53 @@ func `*=`*(a: var EvalParams, b: ParamValue) =
     ,
   )
 
+proc writeEvalParams*(stream: Stream, evalParams: EvalParams) =
+  var params = evalParams
+  doForAll(
+    params,
+    params,
+    proc(x: var ParamValue, y: ParamValue) =
+      {.cast(noSideEffect).}:
+        stream.write x.float64
+    ,
+  )
+
+proc readEvalParams*(stream: Stream): EvalParams =
+  doAssert not isNil stream
+  var params: EvalParams
+
+  proc op(x: var ParamValue, y: ParamValue) =
+    {.cast(noSideEffect).}:
+      discard
+      x = stream.readFloat64().ParamValue
+
+  doForAll(params, params, op)
+
+proc writeEvalParams*(evalParams: EvalParams, fileName: string) =
+  var strm = newFileStream(fileName, fmWrite)
+  if isNil(strm):
+    raise newException(IOError, "Couldn't open file: " & fileName)
+  strm.writeEvalParams evalParams
+  strm.close
+
+# proc readEvalParams*(fileName: string): EvalParams =
+#   let strm = newFileStream(fileName, fmRead)
+#   if isNil(strm):
+#     raise newException(IOError, "Couldn't open file: " & fileName)
+#   result = strm.readEvalParams
+#   strm.close
+
+# proc staticReadEvalParams*(fileName: string): EvalParams =
+#   # staticRead(fileName)
+#   let strm = newStringStream("hellleioj")
+#   strm.setPosition 0
+#   let a = strm.readFloat64
+#   debugEcho a
+#   # if isNil(strm):
+#   #   raise newException(IOError, "Couldn't open static stream for: " & fileName)
+#   # result = strm.readEvalParams
+#   strm.close
+
 const defaultEvalParams* = block:
   var e: EvalParams
   doForAll(
@@ -60,4 +109,19 @@ const defaultEvalParams* = block:
       x = 1.0
     ,
   )
+
+  # const fileName = "default.bin" #"res/params/default.bin"
+  # if fileExists fileName:
+  #   e = staticReadEvalParams fileName
+  # else:
+  #   echo "WARNING! Couldn't find default eval params at ", fileName
   e
+
+
+#import std/streams
+
+const hello = block:
+  let strm = newStringStream("12345678")
+  strm.readFloat64
+
+echo hello

@@ -5,9 +5,9 @@ import std/[macros]
 type EvaluationFunction* = proc(position: Position): Value {.noSideEffect.}
 
 type
-  Gradient = object
-    gradient: ptr EvalParams
-    g: float32
+  Gradient* = object
+    gradient*: ptr EvalParams
+    g*: float32
 
   EvalValue = object
     params: ptr EvalParams
@@ -21,7 +21,7 @@ macro getParameter(structName, parameter: untyped): untyped =
 
 template addValue(evalState: EvalState, goodFor: Color, parameter: untyped) =
   when evalState is Gradient:
-    let f = (if us == red: 1.0 else: -1.0) * evalState.g
+    let f = (if goodFor == red: 1.0 else: -1.0) * evalState.g
     getParameter(evalState.gradient[], parameter) += f
   else:
     static:
@@ -39,9 +39,12 @@ func pst*(evalState: EvalState, position: Position) =
 func absoluteEvaluate*(evalState: EvalState, position: Position) =
   evalState.pst(position)
 
-func absoluteEvaluate*(position: Position): Value =
-  let evalValue = EvalValue(params: addr defaultEvalParams, absoluteValue: addr result)
+func absoluteEvaluate*(evalParams: EvalParams, position: Position): Value =
+  let evalValue = EvalValue(params: addr evalParams, absoluteValue: addr result)
   evalValue.absoluteEvaluate(position)
+
+func absoluteEvaluate*(position: Position): Value =
+  defaultEvalParams.absoluteEvaluate(position)
 
 func perspectiveEvaluate*(position: Position): Value =
   result = position.absoluteEvaluate

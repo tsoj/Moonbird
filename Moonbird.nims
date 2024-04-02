@@ -82,4 +82,13 @@ task sprt, "Runs an SPRT test of the current branch against the main branch":
   setBinaryName("sprt")
   setCommand "c", "src/testing/runSprtTest.nim"
 
+task tuneEvalParams, "Optimizes eval parameters":
+  # highPerformance()
+  
+  --passC:"-O3"
+  --passC:"-march=native"
+  --passC:"-mtune=native"
+  setBinaryName("tuneEvalParams")
+  setCommand "c", "src/tuning/optimization.nim"
+
 #!fmt: on
