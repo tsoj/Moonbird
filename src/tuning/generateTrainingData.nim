@@ -137,4 +137,5 @@ for i, position in openingPositions:
 
 threadpool.syncAll()
 
+echo "Wrote to file ", outputFilename
 echo "Total time: ", now() - startTime
