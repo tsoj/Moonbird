@@ -64,4 +64,4 @@ jobs:
       - name: Build binary
         run: |
           cd Moonbird
-          nim default --static Moonbird
+          nim default --passL:"-static" Moonbird
