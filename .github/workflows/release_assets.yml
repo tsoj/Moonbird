@@ -16,22 +16,28 @@ jobs:
           - os: linux
             cpu: amd64
             nim_branch: devel
+          - os: windows
+            cpu: amd64
+            nim_branch: devel
           - os: macos
             cpu: amd64
             nim_branch: devel
-          - os: windows
-            cpu: amd64
+          - os: macos
+            cpu: arm64
             nim_branch: devel
         include:
           - target:
               os: linux
             builder: ubuntu-22.04
           - target:
+              os: windows
+            builder: windows-2022
+          - target:
               os: macos
             builder: macos-14
           - target:
-              os: windows
-            builder: windows-2022
+              os: macos
+            builder: macos-14
 
     name: '${{ matrix.target.os }}-${{ matrix.target.cpu }}-nim-${{ matrix.target.nim_branch }} (${{ matrix.branch }})'
     runs-on: ${{ matrix.builder }}
@@ -64,4 +70,8 @@ jobs:
       - name: Build binary
         run: |
           cd Moonbird
-          nim default --passL:"-static" Moonbird
+          if [ ${{ runner.os }} = 'macos' ]; then
+            nim default Moonbird
+          else
+            nim default --passL:"-static" Moonbird
+          fi
