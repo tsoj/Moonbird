@@ -71,11 +71,10 @@ jobs:
           fi
 
       - name: Upload release asset
-        uses: actions/upload-release-asset@v1
+        uses: softprops/action-gh-release@v1
+        with:
+          files: ./Moonbird/bin/Moonbird${{ runner.os == 'Windows' && '.exe' || '' }}
+          name: Moonbird-${{ github.event.release.tag_name }}-${{ matrix.target.os }}-${{ matrix.target.cpu }}${{ runner.os == 'Windows' && '.exe' || '' }}
+          content_type: application/octet-stream
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ github.event.release.upload_url }}
-          asset_path: ./Moonbird/bin/Moonbird${{ runner.os == 'Windows' && '.exe' || '' }}
-          asset_name: Moonbird-${{ github.event.release.tag_name }}-${{ matrix.target.os }}-${{ matrix.target.cpu }}
-          asset_content_type: application/octet-stream
