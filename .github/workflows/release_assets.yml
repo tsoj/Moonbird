@@ -38,6 +38,7 @@ jobs:
       NIM_DIR: nim-${{ matrix.target.nim_branch }}-${{ matrix.target.cpu }}
       NIM_BRANCH: ${{ matrix.target.nim_branch }}
       NIM_ARCH: ${{ matrix.target.cpu }}
+      TARGET_BINARY_NAME: Moonbird-${{ github.event.release.tag_name }}-${{ matrix.target.os }}-${{ matrix.target.cpu }}${{ runner.os == 'Windows' && '.exe' || '' }}
     steps:
       - name: Checkout Moonbird
         uses: actions/checkout@v3
@@ -69,12 +70,12 @@ jobs:
           else
             nim default --passL:"-static" Moonbird
           fi
+          mv bin/Moonbird${{ runner.os == 'Windows' && '.exe' || '' }} bin/$TARGET_BINARY_NAME
 
       - name: Upload release asset
         uses: softprops/action-gh-release@v1
         with:
-          files: ./Moonbird/bin/Moonbird${{ runner.os == 'Windows' && '.exe' || '' }}
-          name: Moonbird-${{ github.event.release.tag_name }}-${{ matrix.target.os }}-${{ matrix.target.cpu }}${{ runner.os == 'Windows' && '.exe' || '' }}
+          files: ./Moonbird/bin/$TARGET_BINARY_NAME
           content_type: application/octet-stream
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
