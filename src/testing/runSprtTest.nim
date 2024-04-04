@@ -6,7 +6,7 @@ const
   mainBranch = "main"
   workDir = "src/testing/workdir/"
   cuteAtaxxBinary = "../cuteataxx/build/cuteataxx-cli"
-  moonbirdBinaryFile = "bin/Moonbird-dev-native"
+  moonbirdBinaryFile = "bin/Moonbird-native"
   fenFileName = workDir & "startpos.txt"
   cuteataxxSettingsFileName = workDir & "cuteataxxSettings.json"
   timeControlMilliseconds = 10_000

@@ -33,7 +33,6 @@ let
     projectNimFile = "src/Moonbird.nim"
     suffix = if defined(windows): ".exe" else: ""
     binDir = "bin/"
-    name = projectName() & "-" & version().get(otherwise = "dev")
 
 proc setBinaryName(name: string) =
   switch("o", binDir & name & suffix)
@@ -42,26 +41,26 @@ task debug, "debug compile":
   --define:debug
   --passC:"-O2"
   fullDebuggerInfo()
-  setBinaryName(name & "-debug")
+  setBinaryName(projectName() & "-debug")
   setCommand "c", projectNimFile
 
 task profile, "profile compile":
   highPerformance()
   fullDebuggerInfo()
-  setBinaryName(name & "-profile")
+  setBinaryName(projectName() & "-profile")
   setCommand "c", projectNimFile
 
 task default, "default compile":
   lightDebuggerInfo()
   highPerformance()
-  setBinaryName(name)
+  setBinaryName(projectName())
   setCommand "c", projectNimFile
 
 task native, "native compile":
   highPerformance()
   --passC:"-march=native"
   --passC:"-mtune=native"
-  setBinaryName(name & "-native")
+  setBinaryName(projectName() & "-native")
   setCommand "c", projectNimFile
 
 task tests, "Runs tests":

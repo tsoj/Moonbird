@@ -1,7 +1,6 @@
 name: Release Assets
 
 on:
-  push: # Just for testing
   release:
     types: [created]
 
@@ -70,3 +69,13 @@ jobs:
           else
             nim default --passL:"-static" Moonbird
           fi
+
+      - name: Upload release asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: ./Moonbird/bin/Moonbird
+          asset_name: Moonbird-${{ github.event.release.tag_name }}-${{ matrix.target.os }}-${{ matrix.target.cpu }}
+          asset_content_type: application/octet-stream
