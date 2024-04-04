@@ -76,6 +76,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ github.event.release.upload_url }}
-          asset_path: ./Moonbird/bin/Moonbird
+          asset_path: ./Moonbird/bin/Moonbird${{ runner.os == 'Windows' && '.exe' || '' }}
           asset_name: Moonbird-${{ github.event.release.tag_name }}-${{ matrix.target.os }}-${{ matrix.target.cpu }}
           asset_content_type: application/octet-stream
