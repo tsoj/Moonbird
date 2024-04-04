@@ -40,7 +40,7 @@ jobs:
       NIM_ARCH: ${{ matrix.target.cpu }}
     steps:
       - name: Checkout Moonbird
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           path: Moonbird
           submodules: false
@@ -74,7 +74,6 @@ jobs:
       - name: Upload release asset
         uses: softprops/action-gh-release@v1
         with:
-          files: ./Moonbird/bin/*
-          content_type: application/octet-stream
+          files: ./Moonbird/bin/Moonbird-${{ github.event.release.tag_name }}-${{ matrix.target.os }}-${{ matrix.target.cpu }}${{ runner.os == 'Windows' && '.exe' || '' }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
