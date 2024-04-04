@@ -45,14 +45,6 @@ jobs:
           path: Moonbird
           submodules: false
 
-      - name: Install DLLs dependencies (Windows)
-        if: runner.os == 'Windows'
-        shell: bash
-        run: |
-          mkdir -p external
-          curl -L "https://nim-lang.org/download/windeps.zip" -o external/windeps.zip
-          7z x -y external/windeps.zip -oexternal/dlls-${{ matrix.target.cpu }}
-
       - name: Setup Nim
         uses: alaviss/setup-nim@0.1.1
         with:
