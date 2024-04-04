@@ -9,18 +9,12 @@ jobs:
   release_assets:
     strategy:
       fail-fast: false
-      max-parallel: 5
+      max-parallel: 3
       matrix:
         branch: [master]
         target:
           - os: linux
             cpu: amd64
-            nim_branch: devel
-          - os: linux
-            cpu: arm64
-            nim_branch: devel
-          - os: linux
-            cpu: armv7l
             nim_branch: devel
           - os: windows
             cpu: amd64
@@ -71,7 +65,7 @@ jobs:
         shell: bash
         run: |
           cd Moonbird
-          if [ ${{ runner.os }} = 'macos' ]; then
+          if [ ${{ runner.os }} = 'macOS' ]; then
             nim default Moonbird
           else
             nim default --passL:"-static" Moonbird
