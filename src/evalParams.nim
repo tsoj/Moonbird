@@ -1,13 +1,24 @@
 import types
 
-import std/[os, random]
+import std/[os, random, math]
 
 export types
 
 type
   ParamValue = float32
-  EvalParams* = object
-    pst*: array[a1 .. g7, ParamValue]
+  CoreEvalParams* = object
+    pst*: array[a1 .. g7, array[4 ^ (2 * 2), ParamValue]]
+
+  EvalParams* {.requiresInit.} = object
+    data: seq[CoreEvalParams]
+
+func get*(ep: EvalParams): CoreEvalParams =
+  ep.data[0]
+func get*(ep: var EvalParams): var CoreEvalParams =
+  ep.data[0]
+
+func newEvalParams*(): EvalParams =
+  EvalParams(data: newSeq[CoreEvalParams](1))
 
 func doForAll[T](
     output: var T,
@@ -28,8 +39,8 @@ func doForAll[T](
 
 func `+=`*(a: var EvalParams, b: EvalParams) =
   doForAll(
-    a,
-    b,
+    a.get,
+    b.get,
     proc(x: var ParamValue, y: ParamValue) =
       x += y
     ,
@@ -37,8 +48,8 @@ func `+=`*(a: var EvalParams, b: EvalParams) =
 
 func `*=`*(a: var EvalParams, b: EvalParams) =
   doForAll(
-    a,
-    b,
+    a.get,
+    b.get,
     proc(x: var ParamValue, y: ParamValue) =
       x *= y
     ,
@@ -46,8 +57,8 @@ func `*=`*(a: var EvalParams, b: EvalParams) =
 
 func `*=`*(a: var EvalParams, b: ParamValue) =
   doForAll(
-    a,
-    a,
+    a.get,
+    a.get,
     proc(x: var ParamValue, y: ParamValue) =
       x *= b
     ,
@@ -55,8 +66,8 @@ func `*=`*(a: var EvalParams, b: ParamValue) =
 
 func setAll*(a: var EvalParams, b: ParamValue) =
   doForAll(
-    a,
-    a,
+    a.get,
+    a.get,
     proc(x: var ParamValue, y: ParamValue) =
       x = b
     ,
@@ -64,8 +75,8 @@ func setAll*(a: var EvalParams, b: ParamValue) =
 
 proc setRandom*(a: var EvalParams, b: Slice[float64]) =
   doForAll(
-    a,
-    a,
+    a.get,
+    a.get,
     proc(x: var ParamValue, y: ParamValue) =
       {.cast(noSideEffect).}:
         x = rand(b).ParamValue
@@ -86,12 +97,12 @@ proc toString*(evalParams: EvalParams): string =
         bits = cast[char]((cast[uint64](x.float64) shr shift) and 0b1111_1111)
       s.add bits
 
-  doForAll(params, params, op)
+  doForAll(params.get, params.get, op)
   s
 
 proc toEvalParams*(s: string): EvalParams =
   var
-    params: EvalParams
+    params = newEvalParams()
     i = 0
 
   proc op(x: var ParamValue, y: ParamValue) =
@@ -102,22 +113,33 @@ proc toEvalParams*(s: string): EvalParams =
       i += 1
     x = cast[float64](bits)
 
-  doForAll(params, params, op)
+  doForAll(params.get, params.get, op)
 
   params
 
-const defaultEvalParams* = block:
-  var ep: EvalParams
+const defaultEvalParamsString = block:
+  var s = ""
 
   const fileName = "res/params/default.bin"
   if fileExists fileName:
     # For some reason staticRead starts relative paths at the source file location
-    let s = staticRead("../" & fileName)
-    if s.len == ep.toString.len:
-      ep = s.toEvalParams
-    else:
-      echo "WARNING! Incompatible params format: ", fileName
+    s = staticRead("../" & fileName)
   else:
     echo "WARNING! Couldn't find default eval params at ", fileName
+  s
 
+let defaultEvalParamsData* = block:
+  var ep = newEvalParams()
+
+  if defaultEvalParamsString.len > 0:
+    if defaultEvalParamsString.len == ep.toString.len:
+      ep = defaultEvalParamsString.toEvalParams
+    else:
+      echo "WARNING! Incompatible params format"
+  else:
+    echo "WARNING! Empty eval params string"
   ep
+
+template defaultEvalParams*(): EvalParams =
+  {.cast(noSideEffect).}:
+    defaultEvalParamsData
