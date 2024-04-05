@@ -121,5 +121,3 @@ const defaultEvalParams* = block:
     echo "WARNING! Couldn't find default eval params at ", fileName
 
   ep
-
-echo defaultEvalParams
