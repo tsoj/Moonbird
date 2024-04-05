@@ -22,22 +22,66 @@ macro getParameter(structName, parameter: untyped): untyped =
 template addValue(evalState: EvalState, goodFor: Color, parameter: untyped) =
   when evalState is Gradient:
     let f = (if goodFor == red: 1.0 else: -1.0) * evalState.g
-    getParameter(evalState.gradient[], parameter) += f
+    getParameter(evalState.gradient[].get, parameter) += f
   else:
     static:
       doAssert evalState is EvalValue
-    var value = getParameter(evalState.params[], parameter).Value
+    var value = getParameter(evalState.params[].get, parameter).Value
     if goodFor == blue:
       value *= -1
     evalState.absoluteValue[] += value
 
-func pst*(evalState: EvalState, position: Position) =
-  for color in red .. blue:
-    for square in position[color]:
-      evalState.addValue(goodFor = color, pst[square])
+func maskIndex*(position: Position, square: static Square): int =
+  static:
+    doAssert square.fileNumber <= 5
+    doAssert square.rankNumber <= 5
+
+  let
+    redPieces = position[red] shr square.int8
+    bluePieces = position[blue] shr square.int8
+    blockedPieces = position[blocked] shr square.int8
+
+  var counter = 1
+
+  for bit in [
+    #!fmt: off
+    a2.toBitboard, b2.toBitboard,
+    a1.toBitboard, b1.toBitboard,
+    #!fmt: on
+  ]:
+    if (redPieces and bit) != 0:
+      result += counter * 1
+    elif (bluePieces and bit) != 0:
+      result += counter * 2
+    elif (blockedPieces and bit) != 0:
+      result += counter * 3
+    counter *= 4
+
+func evaluate3x3Structure(
+    evalState: EvalState, position: Position
+) =
+
+  for square in (
+    #!fmt: off
+    a1, b1, c1, d1, e1, f1,
+    a2, b2, c2, d2, e2, f2,
+    a3, b3, c3, d3, e3, f3,
+    a4, b4, c4, d4, e4, f4,
+    a5, b5, c5, d5, e5, f5,
+    a6, b6, c6, d6, e6, f6,
+    #!fmt: on
+  ).fields:
+    if (square.mask(1) and (position[red] or position[blue])) != 0:
+      let index = position.maskIndex(square)
+      evalState.addValue(goodFor = red, pst[square][index])
+
+# func pst*(evalState: EvalState, position: Position) =
+#   for color in red .. blue:
+#     for square in position[color]:
+#       evalState.addValue(goodFor = color, pst[square])
 
 func absoluteEvaluate*(evalState: EvalState, position: Position) =
-  evalState.pst(position)
+  evalState.evaluate3x3Structure(position)
 
 func absoluteEvaluate*(evalParams: EvalParams, position: Position): Value =
   let evalValue = EvalValue(params: addr evalParams, absoluteValue: addr result)

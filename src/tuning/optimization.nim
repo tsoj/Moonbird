@@ -5,9 +5,9 @@ import std/[times, strformat, random, math, os]
 proc optimize(
     start: EvalParams,
     data: var seq[Entry],
-    maxNumEpochs = 10, #30,
-    startLr = 10.0,
-    finalLr = 0.05,
+    maxNumEpochs = 2, #30,
+    startLr = 100.0,
+    finalLr = 1.0,#0.05,
 ): tuple[params: EvalParams, loss: float] =
   var solution = start
 
@@ -54,7 +54,7 @@ echo "Total number of entries: ", data.len
 
 let startDate = now().format("yyyy-MM-dd-HH-mm-ss")
 
-var startEvalParams: EvalParams
+var startEvalParams = newEvalParams()
 let (ep, finalError) = startEvalParams.optimize(data)
 
 let
