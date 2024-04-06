@@ -1,6 +1,6 @@
 import
   types, bitboard, position, positionUtils, move, searchUtils, moveIterator, hashTable,
-  evaluation, utils, movegen
+  searchParams, evaluation, utils, movegen
 
 # static: doAssert pawn.value == 100.cp
 
@@ -10,8 +10,8 @@ import
 # func hashResultFutilityMargin(depthDifference: Ply): Value =
 #     depthDifference.Value * hashResultFutilityMarginMul().cp
 
-# func nullMoveDepth(depth: Ply): Ply =
-#     depth - nullMoveDepthSub() - depth div nullMoveDepthDiv().Ply
+func nullMoveDepth(depth: Ply): Ply =
+  depth - nullMoveDepthSub() - depth div nullMoveDepthDiv().Ply
 
 # func lmrDepth(depth: Ply, lmrMoveCounter: int): Ply =
 #     let halfLife = lmrDepthHalfLife()
@@ -20,7 +20,6 @@ import
 type SearchState* {.requiresInit.} = object
   stop*: bool
   hashTable*: ptr HashTable
-  # killerTable*: KillerTable
   historyTable*: HistoryTable
   repetition*: Repetition
   countedNodes*: int
@@ -46,8 +45,6 @@ func update(
     state.hashTable[].add(position.zobristKey, nodeType, bestValue, depth, bestMove)
     if nodeType != allNode:
       state.historyTable.update(bestMove, position.us, depth, raisedAlpha = true)
-    # if nodeType == cutNode:
-    #     state.killerTable.update(height, bestMove)
 
 func search(
     position: Position, state: var SearchState, alpha, beta: Value, depth, height: Ply
@@ -73,6 +70,21 @@ func search(
 
   if depth <= 0.Ply:
     return state.eval(position)
+
+  # null move reduction
+  if height > 0 and (hashResult.isEmpty or hashResult.nodeType == cutNode) and
+      (not position.occupancy).countSetBits >= minFreeSquaresNullMovePruning():
+    let value =
+      -position.doMove(nullMove).search(
+        state,
+        alpha = -beta,
+        beta = -beta + 1.Value,
+        depth = nullMoveDepth(depth),
+        height = height + 1.Ply,
+      )
+
+    if value >= beta:
+      return value
 
   # iterate over all moves and recursively search the new positions
   for move in position.moveIterator(hashResult.bestMove, state.historyTable):
