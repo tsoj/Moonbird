@@ -11,9 +11,9 @@ func futilityReduction(value: Value): Ply =
 func nullMoveDepth(depth: Ply): Ply =
   depth - nullMoveDepthSub() - depth div nullMoveDepthDiv().Ply
 
-# func lmrDepth(depth: Ply, lmrMoveCounter: int): Ply =
-#     let halfLife = lmrDepthHalfLife()
-#     result = ((depth.int * halfLife) div (halfLife + lmrMoveCounter)).Ply - lmrDepthSub()
+func lmrDepth(depth: Ply, lmrMoveCounter: int): Ply =
+  let halfLife = lmrDepthHalfLife()
+  result = ((depth.int * halfLife) div (halfLife + lmrMoveCounter)).Ply - lmrDepthSub()
 
 type SearchState* {.requiresInit.} = object
   stop*: bool
@@ -65,6 +65,7 @@ func search(
     bestMove = noMove
     bestValue = -valueInfinity
     moveCounter = 0
+    lmrMoveCounter = 0
 
   if depth <= 0.Ply:
     return state.eval(position)
@@ -99,6 +100,11 @@ func search(
     var
       newDepth = depth
       newBeta = beta
+
+    # late move reduction
+    if moveCounter >= minMoveCounterLmr():
+      newDepth = lmrDepth(newDepth, lmrMoveCounter)
+      lmrMoveCounter += 1
 
     # futility reduction
     if moveCounter >= minMoveCounterFutility():
