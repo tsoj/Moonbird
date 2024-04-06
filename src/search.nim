@@ -2,13 +2,11 @@ import
   types, bitboard, position, positionUtils, move, searchUtils, moveIterator, hashTable,
   searchParams, evaluation, utils, movegen
 
-# static: doAssert pawn.value == 100.cp
-
-# func futilityReduction(value: Value): Ply =
-#     clampToType(value.toCp div futilityReductionDiv(), Ply)
+func futilityReduction(value: Value): Ply =
+  clampToType(value.int div futilityReductionDiv(), Ply)
 
 # func hashResultFutilityMargin(depthDifference: Ply): Value =
-#     depthDifference.Value * hashResultFutilityMarginMul().cp
+#     depthDifference.Value * hashResultFutilityMarginMul()
 
 func nullMoveDepth(depth: Ply): Ply =
   depth - nullMoveDepthSub() - depth div nullMoveDepthDiv().Ply
@@ -86,6 +84,8 @@ func search(
     if value >= beta:
       return value
 
+  let staticEval = state.eval(position)
+
   # iterate over all moves and recursively search the new positions
   for move in position.moveIterator(hashResult.bestMove, state.historyTable):
     let newPosition = position.doMove(move)
@@ -99,6 +99,13 @@ func search(
     var
       newDepth = depth
       newBeta = beta
+
+    # futility reduction
+    if moveCounter >= minMoveCounterFutility():
+      newDepth -= futilityReduction(alpha - staticEval)
+
+    if newDepth <= 0:
+      continue
 
     # first explore with null window
     if hashResult.isEmpty or hashResult.bestMove != move or
