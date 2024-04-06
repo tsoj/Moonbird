@@ -2,14 +2,14 @@ import bitboard, position, positionUtils, movegen
 
 export bitboard, position
 
-import std/[sets, tables]
+import std/[sets, tables, random]
 
-const upperLeftQuadrant =
-  (file(a1) or file(b1) or file(c1) or file(d1)) and
-  (rank(a7) or rank(a6) or rank(a5) or rank(a4))
-
-const startPiecePositions =
-  a1.toBitboard or g1.toBitboard or a7.toBitboard or g7.toBitboard
+const
+  upperLeftQuadrant =
+    (file(a1) or file(b1) or file(c1) or file(d1)) and
+    (rank(a7) or rank(a6) or rank(a5) or rank(a4))
+  startPiecePositions = a1.toBitboard or g1.toBitboard or a7.toBitboard or g7.toBitboard
+  defaultMaxNumBlockers = 16
 
 static:
   doAssert startPiecePositions == startPos.occupancy
@@ -45,7 +45,9 @@ func getBlockerConfigurations*(
   for b in blockerSet:
     result.add b
 
-func getStartPositions*(minNumPositions: int, maxNumBlockers: int = 16): seq[Position] =
+func getStartPositions*(
+    minNumPositions: int, maxNumBlockers: int = defaultMaxNumBlockers
+): seq[Position] =
   var startPositions: Table[int, HashSet[Position]]
 
   let blockerConfigurations = getBlockerConfigurations(maxNumBlockers = maxNumBlockers)
@@ -92,6 +94,16 @@ func getStartPositions*(minNumPositions: int, maxNumBlockers: int = 16): seq[Pos
   for (num, s) in startPositions.pairs:
     for pos in s:
       result.add pos
+
+proc createStartPositionFile*(
+    fileName: string, numPositions: int, maxNumBlockers: int = defaultMaxNumBlockers
+) =
+  var positions = getStartPositions(numPositions, defaultMaxNumBlockers)
+  positions.shuffle
+  let fenFile = open(fileName, fmWrite)
+  for position in positions:
+    fenFile.writeLine position.fen
+  fenFile.close()
 
 when isMainModule:
   let startPositions = getStartPositions(100_000)

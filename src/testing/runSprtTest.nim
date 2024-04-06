@@ -1,6 +1,6 @@
 import ../startPositions, ../positionUtils
 
-import std/[osproc, os, strutils, strformat, random, json]
+import std/[osproc, os, strutils, strformat, json]
 
 const
   mainBranch = "main"
@@ -54,12 +54,7 @@ try:
 finally:
   doAssert execCmd("git switch " & currentBranch) == 0
 
-var positions = getStartPositions(maxNumGames)
-positions.shuffle
-let fenFile = open(fenFileName, fmWrite)
-for position in positions:
-  fenFile.writeLine position.fen
-fenFile.close()
+createStartPositionFile fenFileName, maxNumGames
 
 let cuteataxxSettings =
   %*{

@@ -33,6 +33,11 @@ nim sprt --run Moonbird
 nim tuneEvalParams --run Moonbird
 ```
 
+### Tune search parameters
+```shell
+nim runWeatherFactory --run Moonbird
+```
+
 ### Run tests
 ```shell
 ./run_tests.sh

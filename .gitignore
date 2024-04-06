@@ -8,3 +8,4 @@ perf.data*
 generateTrainingData
 nim.cfg
 src/testing/workdir
+src/tuning/weather-factory-ataxx
