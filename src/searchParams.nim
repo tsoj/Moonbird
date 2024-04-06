@@ -88,9 +88,9 @@ addParam(nullMoveDepthSub, default = 3.Ply, min = 0.Ply, max = 10.Ply, step = 1.
 addParam(nullMoveDepthDiv, default = 3, min = 1, max = 15, step = 1, tunable = false)
 addParam(minFreeSquaresNullMovePruning, default = 8, min = 0, max = 49, step = 2, tunable = false)
 
-# addParam(lmrDepthHalfLife, default = 36, min = 5, max = 60, step = 5)
-# addParam(lmrDepthSub, default = 1.Ply, min = 0.Ply, max = 5.Ply, step = 1.Ply)
-# addParam(minMoveCounterLmr, default = 5, min = 1, max = 15, step = 1)
+addParam(lmrDepthHalfLife, default = 36, min = 5, max = 60, step = 10)
+addParam(lmrDepthSub, default = 0.Ply, min = 0.Ply, max = 5.Ply, step = 1.Ply)
+addParam(minMoveCounterLmr, default = 5, min = 1, max = 15, step = 3)
 
 # addParam(iirMinDepth, default = 4.Ply, min = 0.Ply, max = 12.Ply, step = 1.Ply)
 
