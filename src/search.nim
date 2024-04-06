@@ -96,15 +96,36 @@ func search(
       return # TODO break
       #break
 
+    var
+      newDepth = depth
+      newBeta = beta
+
+    # first explore with null window
+    if hashResult.isEmpty or hashResult.bestMove != move or
+        hashResult.nodeType == allNode:
+      newBeta = alpha + 1
+
     # search new position
     var value =
       -newPosition.search(
         state,
-        alpha = -beta,
+        alpha = -newBeta,
         beta = -alpha,
-        depth = depth - 1.Ply,
+        depth = newDepth - 1.Ply,
         height = height + 1.Ply,
       )
+
+    # re-search with full window and full depth
+    if value > alpha and (newDepth < depth or newBeta < beta):
+      newDepth = depth
+      value =
+        -newPosition.search(
+          state,
+          alpha = -beta,
+          beta = -alpha,
+          depth = depth - 1.Ply,
+          height = height + 1.Ply,
+        )
 
     if value > bestValue:
       bestValue = value
