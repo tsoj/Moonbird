@@ -33,21 +33,6 @@ func gameStatus*(position: Position): GameStatus =
   else:
     running
 
-# TODO
-# func asciiColorString(color: Color): string =
-#   case color
-#   of red: "o"
-#   of blue: "x"
-#   of blocked: "-"
-#   else: " "
-
-# func beatifulColorString(color: Color): string =
-#   case color
-#   of red: "🏶"
-#   of blue: "♠"
-#   of blocked: "🞓"
-#   else: " "
-
 const
   fenStrings = [red: "x", blue: "o", blocked: "-", noColor: "1"]
   prettyStrings = [red: "🏶", blue: "♠", blocked: "🞓", noColor: "?"]

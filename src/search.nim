@@ -21,7 +21,7 @@ type SearchState* {.requiresInit.} = object
   stop*: bool
   hashTable*: ptr HashTable
   # killerTable*: KillerTable
-  # historyTable*: HistoryTable
+  historyTable*: HistoryTable
   repetition*: Repetition
   countedNodes*: int
   maxNodes*: int
@@ -44,8 +44,8 @@ func update(
 ) =
   if bestMove != noMove and bestValue.abs < valueInfinity:
     state.hashTable[].add(position.zobristKey, nodeType, bestValue, depth, bestMove)
-    # if nodeType != allNode:
-    #     state.historyTable.update(bestMove, previous, position.us, depth, raisedAlpha = true)
+    if nodeType != allNode:
+      state.historyTable.update(bestMove, position.us, depth, raisedAlpha = true)
     # if nodeType == cutNode:
     #     state.killerTable.update(height, bestMove)
 
@@ -75,7 +75,7 @@ func search(
     return state.eval(position)
 
   # iterate over all moves and recursively search the new positions
-  for move in position.moveIterator(hashResult.bestMove):
+  for move in position.moveIterator(hashResult.bestMove, state.historyTable):
     let newPosition = position.doMove(move)
     moveCounter += 1
 
@@ -105,6 +105,8 @@ func search(
     if value > alpha:
       nodeType = pvNode
       alpha = value
+    else:
+      state.historyTable.update(move, position.us, depth, raisedAlpha = false)
 
   if moveCounter <= 1:
     let

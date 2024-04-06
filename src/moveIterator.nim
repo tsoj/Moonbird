@@ -1,6 +1,10 @@
-import move, position, movegen
+import move, position, movegen, searchUtils
 
-iterator moveIterator*(position: Position, tryFirstMove = noMove): Move =
+iterator moveIterator*(
+    position: Position,
+    tryFirstMove = noMove,
+    historyTable: HistoryTable or tuple[] = (),
+): Move =
   if tryFirstMove.isLegal(position):
     yield tryFirstMove
 
@@ -11,7 +15,17 @@ iterator moveIterator*(position: Position, tryFirstMove = noMove): Move =
   var movePriorities = newSeqOfCap[float](moves.len)
 
   for move in moves:
-    movePriorities.add move.pieceDelta(position).float
+    let score =
+      move.pieceDelta(position).float + (
+        when historyTable is HistoryTable:
+          historyTable.get(move, position.us)
+        else:
+          0.0
+      )
+
+    # debugEcho score
+
+    movePriorities.add score
 
     if move == tryFirstMove:
       movePriorities[^1] = float.low
