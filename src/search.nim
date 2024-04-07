@@ -57,8 +57,6 @@ func search(
   ):
     return 0.Value
 
-  let hashResult = state.hashTable[].get(position.zobristKey)
-
   var
     alpha = alpha
     nodeType = allNode
@@ -66,6 +64,23 @@ func search(
     bestValue = -valueInfinity
     moveCounter = 0
     lmrMoveCounter = 0
+
+  let hashResult = state.hashTable[].get(position.zobristKey)
+
+  let beta = block:
+    # update alpha, beta or return immediatly based on hash table result
+    var beta = beta
+    if height > 0 and not hashResult.isEmpty and hashResult.depth >= depth:
+      if hashResult.nodeType == pvNode:
+        return hashResult.value
+      if hashResult.nodeType != allNode:
+        alpha = max(alpha, hashResult.value)
+      if hashResult.nodeType != cutNode:
+        beta = min(beta, hashResult.value)
+
+      if alpha >= beta:
+        return alpha
+    beta
 
   if depth <= 0.Ply:
     return state.eval(position)
