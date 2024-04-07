@@ -7,7 +7,7 @@ proc optimize(
     data: var seq[Entry],
     maxNumEpochs = 2, #30,
     startLr = 100.0,
-    finalLr = 1.0,#0.05,
+    finalLr = 1.0, #0.05,
 ): tuple[params: EvalParams, loss: float] =
   var solution = start
 

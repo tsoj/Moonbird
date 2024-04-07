@@ -43,12 +43,8 @@ func maskIndex*(position: Position, square: static Square): int =
 
   var counter = 1
 
-  for bit in [
-    #!fmt: off
-    a2.toBitboard, b2.toBitboard,
-    a1.toBitboard, b1.toBitboard,
-    #!fmt: on
-  ]:
+  for sq in [a2, b2, a1, b1]:
+    let bit = sq.toBitboard
     if (redPieces and bit) != 0:
       result += counter * 1
     elif (bluePieces and bit) != 0:
@@ -57,31 +53,28 @@ func maskIndex*(position: Position, square: static Square): int =
       result += counter * 3
     counter *= 4
 
-func evaluate3x3Structure(
-    evalState: EvalState, position: Position
-) =
+func get2x2Mask(square: static Square): Bitboard =
+  for sq in [a2, b2, a1, b1]:
+    result |= sq.toBitboard shl square.int
 
+func evaluate2x2Structure(evalState: EvalState, position: Position) =
+
+  #!fmt: off
   for square in (
-    #!fmt: off
     a1, b1, c1, d1, e1, f1,
     a2, b2, c2, d2, e2, f2,
     a3, b3, c3, d3, e3, f3,
     a4, b4, c4, d4, e4, f4,
     a5, b5, c5, d5, e5, f5,
     a6, b6, c6, d6, e6, f6,
-    #!fmt: on
   ).fields:
-    if (square.mask(1) and (position[red] or position[blue])) != 0:
+    if ((position[red] or position[blue]) and square.get2x2Mask) != 0:
       let index = position.maskIndex(square)
       evalState.addValue(goodFor = red, pst[square][index])
-
-# func pst*(evalState: EvalState, position: Position) =
-#   for color in red .. blue:
-#     for square in position[color]:
-#       evalState.addValue(goodFor = color, pst[square])
+  #!fmt: on
 
 func absoluteEvaluate*(evalState: EvalState, position: Position) =
-  evalState.evaluate3x3Structure(position)
+  evalState.evaluate2x2Structure(position)
   evalState.addValue(goodFor = position.us, turnBonus)
 
 func absoluteEvaluate*(evalParams: EvalParams, position: Position): Value =
