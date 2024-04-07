@@ -5,9 +5,6 @@ import
 func futilityReduction(value: Value): Ply =
   clampToType(value.int div futilityReductionDiv(), Ply)
 
-# func hashResultFutilityMargin(depthDifference: Ply): Value =
-#     depthDifference.Value * hashResultFutilityMarginMul()
-
 func nullMoveDepth(depth: Ply): Ply =
   depth - nullMoveDepthSub() - depth div nullMoveDepthDiv().Ply
 
@@ -57,6 +54,8 @@ func search(
   ):
     return 0.Value
 
+  let hashResult = state.hashTable[].get(position.zobristKey)
+
   var
     alpha = alpha
     nodeType = allNode
@@ -65,7 +64,14 @@ func search(
     moveCounter = 0
     lmrMoveCounter = 0
 
-  let hashResult = state.hashTable[].get(position.zobristKey)
+  let depth = block:
+    var depth = depth
+
+    # internal iterative reduction
+    if hashResult.isEmpty and depth >= iirMinDepth():
+      depth -= 1.Ply
+
+    depth
 
   let beta = block:
     # update alpha, beta or return immediatly based on hash table result
