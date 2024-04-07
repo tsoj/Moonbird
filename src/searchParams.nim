@@ -74,10 +74,8 @@ proc printUaiSearchParams*() =
       " max ",
       param.max
 
-# addParam(deltaMargin, default = 92, min = 30, max = 300, step = 10)
-# addParam(failHighDeltaMargin, default = 69, min = 10, max = 200, step = 10)
-# addParam(aspirationWindowStartingOffset, default = 9, min = 2, max = 100, step = 2)
-# addParam(aspirationWindowMultiplier, default = 1.9, min = 1.1, max = 10.0, step = 0.2)
+addParam(aspirationWindowStartingOffset, default = 9, min = 2, max = 100, step = 2)
+addParam(aspirationWindowMultiplier, default = 1.9, min = 1.1, max = 10.0, step = 0.2)
 
 addParam(minMoveCounterFutility, default = 2, min = 1, max = 10, step = 2, tunable = false)
 addParam(futilityReductionDiv, default = 83, min = 10, max = 500, step = 40, tunable = false)

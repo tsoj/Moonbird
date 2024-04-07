@@ -195,6 +195,28 @@ func search*(position: Position, state: var SearchState, depth: Ply) =
   state.stop = false
   state.countedNodes = 0
 
-  discard position.search(
-    state, alpha = -valueInfinity, beta = valueInfinity, depth = depth, height = 0.Ply
-  )
+  let hashResult = state.hashTable[].get(position.zobristKey)
+
+  var
+    estimatedValue = (if hashResult.isEmpty: 0.Value else: hashResult.value).float
+    alphaOffset = aspirationWindowStartingOffset().float
+    betaOffset = aspirationWindowStartingOffset().float
+
+  # growing alpha beta window
+  while not state.shouldStop:
+    let
+      alpha = max(estimatedValue - alphaOffset, -valueInfinity.float).Value
+      beta = min(estimatedValue + betaOffset, valueInfinity.float).Value
+
+    let value =
+      position.search(state, alpha = alpha, beta = beta, depth = depth, height = 0.Ply)
+
+    doAssert value.abs <= valueInfinity
+
+    estimatedValue = value.float
+    if value <= alpha:
+      alphaOffset *= aspirationWindowMultiplier()
+    elif value >= beta:
+      betaOffset *= aspirationWindowMultiplier()
+    else:
+      break
