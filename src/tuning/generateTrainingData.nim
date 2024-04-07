@@ -5,7 +5,8 @@ import
   ../positionUtils,
   ../game,
   ../version,
-  ../startPositions
+  ../startPositions,
+  tuningUtils
 
 import taskpools
 
@@ -20,10 +21,12 @@ let
   useOnlyHalfCPU = commandLineParams()[2].parseBool
 
 const
-  randRatio = 0.0005
-  minNumStartPositions = 1000
   # We need a minimum number of start positions, as otherwise it's difficult to adjust the number
-  # of randomly selected leaves to get to the target number of training samples
+  # of randomly selected leaves to get to the target number of training sample
+  minNumStartPositions = 1000
+  randRatio = 0.0005
+  sampleFrequencyInGameHalfmove = 40 .. 80
+  ratioGameResultSearchValue = 0.5
 
 doAssert not gitHasUnstagedChanges,
   "Shouldn't do training data generation with unstaged changes"
@@ -50,13 +53,33 @@ func isValidSamplePosition(position: Position): bool =
   position.gameStatus == running and position.halfmoveClock < 50
     # otherwise the position is probably just shuffling
 
-proc playGame(startPos: Position, hashTable: ref HashTable): float =
+proc playGame(startPos: Position, hashTable: ref HashTable): seq[(Position, float)] =
   var game = newGame(
     startPosition = startPos, maxNodes = sampleGameSearchNodes, hashTable = hashTable
   )
-  let gameResult = game.playGame # (printInfo = true)
+  let
+    gameResult = game.playGame # (printInfo = true)
+    positionHistory = game.getPositionHistory
   doAssert gameResult in 0.0 .. 1.0
-  return gameResult
+
+  var
+    rg = initRand()
+    index = 0
+
+  while index < positionHistory.len:
+    let
+      (position, value) = positionHistory[index]
+      searchWinningProb = value.winningProbability
+
+    if position.isValidSamplePosition:
+      let label =
+        ratioGameResultSearchValue * gameResult +
+        (1.0 - ratioGameResultSearchValue) * searchWinningProb
+
+      result.add (position, label)
+      index += rg.rand(sampleFrequencyInGameHalfmove)
+    else:
+      index += 1
 
 let
   openingPositions = block:
@@ -101,13 +124,14 @@ proc findStartPositionsAndPlay(startPos: Position, stringIndex: string) =
       result = position.perspectiveEvaluate
       {.cast(noSideEffect).}:
         if rg.rand(1.0) <= randRatio and position.isValidSamplePosition:
-          let gameResult = position.playGame(sampleGameHashTable)
-          numSamples += 1
+          let samples = position.playGame(sampleGameHashTable)
+          numSamples += samples.len
 
           withLock outFileMutex:
-            outFileStream.writePosition position
-            outFileStream.write gameResult
-            outFileStream.flush
+            for (position, value) in samples:
+              outFileStream.writePosition position
+              outFileStream.write value
+              outFileStream.flush
 
     var game = newGame(
       startPosition = startPos,
