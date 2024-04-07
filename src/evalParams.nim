@@ -7,7 +7,7 @@ export types
 type
   ParamValue = float32
   CoreEvalParams* = object
-    pst*: array[a1 .. g7, array[4 ^ (2 * 2), ParamValue]]
+    pst*: array[a1 .. g7, array[4 ^ 4, ParamValue]]
     turnBonus*: ParamValue
 
   EvalParams* {.requiresInit.} = object
