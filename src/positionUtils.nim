@@ -202,3 +202,42 @@ proc readPosition*(stream: Stream): Position =
   result.us = stream.readUint8.Color
   result.halfmovesPlayed = stream.readUInt16.int
   result.halfmoveClock = stream.readUInt16.int
+
+func swapColors*(position: Position): Position =
+  result = Position(
+    pieces: [red: position[blue], blue: position[red], blocked: position[blocked]],
+    us: position.enemy,
+    halfmoveClock: position.halfmoveClock,
+    halfmovesPlayed: position.halfmovesPlayed,
+  )
+  result.zobristKey = result.calculateZobristKey
+
+func mirrorVertically*(position: Position): Position =
+  result = position
+  for b in result.pieces.mitems:
+    b = b.mirrorVertically
+  result.zobristKey = result.calculateZobristKey
+
+func mirrorHorizontally*(position: Position): Position =
+  result = position
+  for b in result.pieces.mitems:
+    b = b.mirrorHorizontally
+  result.zobristKey = result.calculateZobristKey
+
+func rotate90*(position: Position): Position =
+  result = position
+  for b in result.pieces.mitems:
+    b = b.rotate90
+  result.zobristKey = result.calculateZobristKey
+
+func rotate180*(position: Position): Position =
+  result = position
+  for b in result.pieces.mitems:
+    b = b.rotate180
+  result.zobristKey = result.calculateZobristKey
+
+func rotate270*(position: Position): Position =
+  result = position
+  for b in result.pieces.mitems:
+    b = b.rotate180.rotate90
+  result.zobristKey = result.calculateZobristKey

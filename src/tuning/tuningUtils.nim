@@ -54,15 +54,14 @@ func error*(evalParams: EvalParams, data: openArray[Entry]): float =
     result += evalParams.error(entry)
   result /= data.len.float
 
-    
 func addGradient*(
-    params: var EvalParams,
-    lr: float,
-    position: Position, outcome: float
+    params: var EvalParams, lr: float, position: Position, outcome: float
 ) =
-    let currentValue = params.absoluteEvaluate(position)
-    var currentGradient = Gradient(
-        g: errorDerivative(outcome, currentValue.winningProbability) * currentValue.winningProbabilityDerivative * lr,
-        gradient: addr params
-    )
-    currentGradient.absoluteEvaluate(position)
+  let currentValue = params.absoluteEvaluate(position)
+  var currentGradient = Gradient(
+    g:
+      errorDerivative(outcome, currentValue.winningProbability) *
+      currentValue.winningProbabilityDerivative * lr,
+    gradient: addr params,
+  )
+  currentGradient.absoluteEvaluate(position)
