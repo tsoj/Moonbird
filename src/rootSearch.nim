@@ -35,7 +35,7 @@ iterator iterativeDeepeningSearch*(
       stop: false,
       countedNodes: 0,
       hashTable: addr hashTable,
-      historyTable: newHistoryTable(),
+      historyTable: HistoryTable(),
       repetition: newRepetition(positionHistory[0 ..^ 2]),
       maxNodes: maxNodes,
       stopTime: stopTime,

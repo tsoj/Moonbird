@@ -27,15 +27,8 @@ func update*(repetition: var Repetition, position: Position, height: Ply) =
 
 type
   HistoryArray = array[red .. blue, array[a1 .. g7, array[a1 .. g7, float]]]
-    # TODO make entries dependent on how many pieces are captured
   HistoryTable* = object
     table: HistoryArray
-    # counterTable: ref array[pawn..king, array[a1..h8, HistoryArray]]
-
-func newHistoryTable*(): HistoryTable =
-  # allocating this on the heap, as it is too big for the stack
-  # result.counterTable = new array[pawn..king, array[a1..h8, HistoryArray]]
-  discard # TODO
 
 func halve(table: var HistoryArray, color: Color) =
   for sq1 in a1 .. g7:
@@ -69,21 +62,8 @@ func update*(
 
   historyTable.table.add(color, move, addition)
 
-  # if previous.moved in pawn .. king and previous.target in a1 .. h8:
-  #   historyTable.counterTable[][previous.moved][previous.target].add(
-  #     color, move, addition * historyTableCounterMul()
-  #   )
-
 func get*(historyTable: HistoryTable, move: Move, color: Color): -1.0 .. 1.0 =
   if move != nullMove:
     doAssert move.source != noSquare and move.target != noSquare
     var sum = historyTable.table[color][move.source][move.target]
     return sum / maxHistoryTableValue().float
-
-  # if previous.moved in pawn .. king and previous.target in a1 .. h8:
-  #   sum +=
-  #     historyTable.counterTable[][previous.moved][previous.target][color][move.moved][
-  #       move.target
-  #     ]
-
-  # sum / (2 * maxHistoryTableValue().float)
