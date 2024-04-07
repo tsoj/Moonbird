@@ -25,45 +25,39 @@ func update*(repetition: var Repetition, position: Position, height: Ply) =
 
 #-------------- History heuristic --------------#
 
-type
-  HistoryArray = array[red .. blue, array[a1 .. g7, array[a1 .. g7, float]]]
-  HistoryTable* = object
-    table: HistoryArray
+type HistoryTable* = object
+  table: array[red .. blue, array[a1 .. g7, array[a1 .. g7, float]]]
 
-func halve(table: var HistoryArray, color: Color) =
+func halve(h: var HistoryTable, color: Color) =
   for sq1 in a1 .. g7:
     for sq2 in a1 .. g7:
-      table[color][sq1][sq2] /= historyTableShrinkDiv()
+      h.table[color][sq1][sq2] /= historyTableShrinkDiv()
+
+func add(h: var HistoryTable, color: Color, move: Move, addition: float) =
+  template entry(): auto =
+    h.table[color][move.source][move.target]
+
+  entry =
+    clamp(entry + addition, -maxHistoryTableValue().float, maxHistoryTableValue().float)
+
+  if entry.abs >= maxHistoryTableValue().float:
+    h.halve(color)
 
 func update*(
-    historyTable: var HistoryTable,
-    move: Move,
-    color: Color,
-    depth: Ply,
-    raisedAlpha: bool,
+    h: var HistoryTable, move: Move, color: Color, depth: Ply, raisedAlpha: bool
 ) =
   if move == nullMove:
     return
 
   doAssert move.source != noSquare and move.target != noSquare
 
-  func add(table: var HistoryArray, color: Color, move: Move, addition: float) =
-    template entry(): auto =
-      table[color][move.source][move.target]
-
-    entry = clamp(
-      entry + addition, -maxHistoryTableValue().float, maxHistoryTableValue().float
-    )
-    if entry.abs >= maxHistoryTableValue().float:
-      table.halve(color)
-
   let addition =
     (if raisedAlpha: 1.0 else: -1.0 / historyTableBadMoveDivider()) * depth.float ^ 2
 
-  historyTable.table.add(color, move, addition)
+  h.add(color, move, addition)
 
-func get*(historyTable: HistoryTable, move: Move, color: Color): -1.0 .. 1.0 =
+func get*(h: HistoryTable, move: Move, color: Color): -1.0 .. 1.0 =
   if move != nullMove:
     doAssert move.source != noSquare and move.target != noSquare
-    var sum = historyTable.table[color][move.source][move.target]
-    return sum / maxHistoryTableValue().float
+
+    return h.table[color][move.source][move.target] / maxHistoryTableValue().float

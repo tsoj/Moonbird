@@ -10,7 +10,7 @@ type ParamEntry = object
   max: int
   step: int
 
-var paramTable: Table[string, ParamEntry]
+var paramTable: OrderedTable[string, ParamEntry]
 
 proc getVarName(name: NimNode): NimNode =
   parseExpr($toStrLit(name) & "Var")
@@ -24,7 +24,7 @@ func getAsInt[T](a: T): int =
   else:
     a.int
 
-macro addParam[T](name: untyped, default, min, max, step: T, tunable: bool = false): untyped =
+macro addParam[T](name: untyped, default, min, max, step: T, tunable: bool = true): untyped =
   let
     varName: NimNode = getVarName(name)
     varString: NimNode = getVarString(name)
@@ -74,27 +74,26 @@ proc printUaiSearchParams*() =
       " max ",
       param.max
 
-addParam(aspirationWindowStartingOffset, default = 9, min = 2, max = 100, step = 2)
+addParam(aspirationWindowStartingOffset, default = 8, min = 2, max = 100, step = 2)
 addParam(aspirationWindowMultiplier, default = 1.9, min = 1.1, max = 10.0, step = 0.2)
 
-addParam(minMoveCounterFutility, default = 2, min = 1, max = 10, step = 2)
-addParam(futilityReductionDiv, default = 83, min = 10, max = 500, step = 40)
+addParam(minMoveCounterFutility, default = 2, min = 2, max = 20, step = 2)
+addParam(futilityReductionDiv, default = 67, min = 10, max = 500, step = 30)
 
 addParam(nullMoveDepthSub, default = 3.Ply, min = 0.Ply, max = 10.Ply, step = 1.Ply)
 addParam(nullMoveDepthDiv, default = 3, min = 1, max = 15, step = 1)
-addParam(minFreeSquaresNullMovePruning, default = 8, min = 0, max = 49, step = 2)
+addParam(minFreeSquaresNullMovePruning, default = 9, min = 0, max = 49, step = 2)
 
-addParam(lmrDepthHalfLife, default = 36, min = 5, max = 60, step = 10)
-addParam(lmrDepthSub, default = 0.Ply, min = 0.Ply, max = 5.Ply, step = 1.Ply)
-addParam(minMoveCounterLmr, default = 5, min = 1, max = 15, step = 3)
+addParam(lmrDepthHalfLife, default = 37, min = 5, max = 60, step = 10)
+addParam(lmrDepthSub, default = 1.Ply, min = 0.Ply, max = 5.Ply, step = 1.Ply)
+addParam(minMoveCounterLmr, default = 4, min = 1, max = 15, step = 2)
 
 addParam(iirMinDepth, default = 4.Ply, min = 0.Ply, max = 12.Ply, step = 1.Ply)
 
-addParam(
-  maxHistoryTableValue, default = 109000, min = 1000, max = 10000000, step = 50000
-)
-addParam(historyTableBadMoveDivider, default = 9.7, min = 1.0, max = 100.0, step = 10.0)
-addParam(historyTableShrinkDiv, default = 2.0, min = 1.1, max = 10.0, step = 0.5)
+addParam(maxHistoryTableValue, default = 97000, min = 1000, max = 10000000, step = 40000)
+addParam(historyTableBadMoveDivider, default = 12.7, min = 1.0, max = 100.0, step = 8.0)
+addParam(historyTableShrinkDiv, default = 1.9, min = 1.1, max = 10.0, step = 0.5)
+addParam(historyMoveOrderingFactor, default = 6.9, min = 0.1, max = 1000.0, step = 5.0)
 
 proc getWeatherFactoryConfig*(): string =
   result = "{"
