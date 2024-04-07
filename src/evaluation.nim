@@ -82,6 +82,7 @@ func evaluate3x3Structure(
 
 func absoluteEvaluate*(evalState: EvalState, position: Position) =
   evalState.evaluate3x3Structure(position)
+  evalState.addValue(goodFor = position.us, turnBonus)
 
 func absoluteEvaluate*(evalParams: EvalParams, position: Position): Value =
   let evalValue = EvalValue(params: addr evalParams, absoluteValue: addr result)
