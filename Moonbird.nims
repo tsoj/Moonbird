@@ -84,7 +84,7 @@ task tuneEvalParams, "Optimizes eval parameters":
   highPerformance()
   --passC:"-march=native"
   --passC:"-mtune=native"
-  --define:release
+  # --define:release
   setBinaryName("tuneEvalParams")
   setCommand "c", "src/tuning/optimization.nim"
 

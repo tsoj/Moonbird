@@ -203,7 +203,7 @@ proc readPosition*(stream: Stream): Position =
   result.halfmovesPlayed = stream.readUInt16.int
   result.halfmoveClock = stream.readUInt16.int
 
-func swapColors*(position: Position): Position =
+func swapColors*(position: Position, skipZobristKey: bool = false): Position =
   result = Position(
     pieces: [red: position[blue], blue: position[red], blocked: position[blocked]],
     us: position.enemy,
@@ -212,32 +212,30 @@ func swapColors*(position: Position): Position =
   )
   result.zobristKey = result.calculateZobristKey
 
-func mirrorVertically*(position: Position): Position =
-  result = position
-  for b in result.pieces.mitems:
-    b = b.mirrorVertically
-  result.zobristKey = result.calculateZobristKey
+template applyTransform(
+    position: Position, skipZobristKey: bool, transform: untyped
+): Position =
+  var transformed = position
+  for b in transformed.pieces.mitems:
+    b = b.transform
+  if not skipZobristKey:
+    transformed.zobristKey = transformed.calculateZobristKey
+  transformed
 
-func mirrorHorizontally*(position: Position): Position =
-  result = position
-  for b in result.pieces.mitems:
-    b = b.mirrorHorizontally
-  result.zobristKey = result.calculateZobristKey
+func mirrorVertically*(position: Position, skipZobristKey: bool = false): Position =
+  position.applyTransform skipZobristKey, mirrorVertically
 
-func rotate90*(position: Position): Position =
-  result = position
-  for b in result.pieces.mitems:
-    b = b.rotate90
-  result.zobristKey = result.calculateZobristKey
+func mirrorHorizontally*(position: Position, skipZobristKey: bool = false): Position =
+  position.applyTransform skipZobristKey, mirrorHorizontally
 
-func rotate180*(position: Position): Position =
-  result = position
-  for b in result.pieces.mitems:
-    b = b.rotate180
-  result.zobristKey = result.calculateZobristKey
+func rotate90*(position: Position, skipZobristKey: bool = false): Position =
+  position.applyTransform skipZobristKey, rotate90
 
-func rotate270*(position: Position): Position =
-  result = position
-  for b in result.pieces.mitems:
-    b = b.rotate180.rotate90
-  result.zobristKey = result.calculateZobristKey
+func rotate180*(position: Position, skipZobristKey: bool = false): Position =
+  position.applyTransform skipZobristKey, rotate180
+
+func rotate270*(position: Position, skipZobristKey: bool = false): Position =
+  position.applyTransform skipZobristKey, rotate270
+
+func nullTransform*(position: Position, skipZobristKey: bool = false): Position =
+  position
