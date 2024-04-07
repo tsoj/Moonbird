@@ -24,7 +24,9 @@ func getAsInt[T](a: T): int =
   else:
     a.int
 
-macro addParam[T](name: untyped, default, min, max, step: T, tunable: bool = true): untyped =
+macro addParam[T](
+    name: untyped, default, min, max, step: T, tunable: bool = true
+): untyped =
   let
     varName: NimNode = getVarName(name)
     varString: NimNode = getVarString(name)
@@ -90,7 +92,9 @@ addParam(minMoveCounterLmr, default = 4, min = 1, max = 15, step = 2)
 
 addParam(iirMinDepth, default = 4.Ply, min = 0.Ply, max = 12.Ply, step = 1.Ply)
 
-addParam(maxHistoryTableValue, default = 97000, min = 1000, max = 10000000, step = 40000)
+addParam(
+  maxHistoryTableValue, default = 97000, min = 1000, max = 10000000, step = 40000
+)
 addParam(historyTableBadMoveDivider, default = 12.7, min = 1.0, max = 100.0, step = 8.0)
 addParam(historyTableShrinkDiv, default = 1.9, min = 1.1, max = 10.0, step = 0.5)
 addParam(historyMoveOrderingFactor, default = 6.9, min = 0.1, max = 1000.0, step = 5.0)

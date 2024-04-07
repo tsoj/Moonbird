@@ -150,9 +150,31 @@ proc blockerConfigurations(): Option[string] =
   if blockerConfigurations16.len != 2868:
     return some &"Failed to find the right number of blocker configurations: Is {blockerConfigurations16.len}, but should be 2868"
 
+proc positionTransforms(): Option[string] =
+  for fen in someFens:
+    for i, transformSeq in [
+      @[swapColors, swapColors],
+      @[mirrorVertically, mirrorVertically],
+      @[mirrorHorizontally, mirrorHorizontally],
+      @[rotate90, rotate270],
+      @[rotate180, rotate180],
+      @[rotate180, rotate90, rotate90],
+      @[
+        swapColors, mirrorHorizontally, rotate90, swapColors, mirrorVertically,
+        rotate270,
+      ],
+    ]:
+      let position = fen.toPosition
+      var transformed = position
+      for transform in transformSeq:
+        transformed = transformed.transform
+      if position != transformed:
+        return some &"Failed position transform sequence number {i} for position {fen}"
+
 proc runTests*(): bool =
   const tests = [
     (testFen, "FEN parsing"),
+    (positionTransforms, "Position transform"),
     (positionStreams, "Binary position streams"),
     (testLegalMoveTest, "Legal move check"),
     (testPerft, "Move generation"),
