@@ -73,8 +73,14 @@ func evaluate2x2Structure(evalState: EvalState, position: Position) =
       evalState.addValue(goodFor = red, pst[square][index])
   #!fmt: on
 
+func mobility(evalState: EvalState, position: Position) =
+  for color in red..blue:
+    let targets = position[color].singles.singles and not position.occupancy
+    evalState.addValue(goodFor = color, mobility[targets.countSetBits])
+
 func absoluteEvaluate*(evalState: EvalState, position: Position) =
   evalState.evaluate2x2Structure(position)
+  evalState.mobility(position)
   evalState.addValue(goodFor = position.us, turnBonus)
 
 func absoluteEvaluate*(evalParams: EvalParams, position: Position): Value =
