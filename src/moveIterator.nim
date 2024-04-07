@@ -1,4 +1,4 @@
-import move, position, movegen, searchUtils
+import move, position, movegen, searchUtils, searchParams
 
 iterator moveIterator*(
     position: Position,
@@ -18,12 +18,10 @@ iterator moveIterator*(
     let score =
       move.pieceDelta(position).float + (
         when historyTable is HistoryTable:
-          historyTable.get(move, position.us)
+          historyTable.get(move, position.us) * historyMoveOrderingFactor()
         else:
           0.0
       )
-
-    # debugEcho score
 
     movePriorities.add score
 
