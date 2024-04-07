@@ -82,17 +82,15 @@ proc printUaiSearchParams*() =
 addParam(minMoveCounterFutility, default = 2, min = 1, max = 10, step = 2, tunable = false)
 addParam(futilityReductionDiv, default = 83, min = 10, max = 500, step = 40, tunable = false)
 
-# addParam(hashResultFutilityMarginMul, default = 280, min = 50, max = 1000, step = 10)
-
 addParam(nullMoveDepthSub, default = 3.Ply, min = 0.Ply, max = 10.Ply, step = 1.Ply, tunable = false)
 addParam(nullMoveDepthDiv, default = 3, min = 1, max = 15, step = 1, tunable = false)
 addParam(minFreeSquaresNullMovePruning, default = 8, min = 0, max = 49, step = 2, tunable = false)
 
-addParam(lmrDepthHalfLife, default = 36, min = 5, max = 60, step = 10)
-addParam(lmrDepthSub, default = 0.Ply, min = 0.Ply, max = 5.Ply, step = 1.Ply)
-addParam(minMoveCounterLmr, default = 5, min = 1, max = 15, step = 3)
+addParam(lmrDepthHalfLife, default = 36, min = 5, max = 60, step = 10, tunable = false)
+addParam(lmrDepthSub, default = 0.Ply, min = 0.Ply, max = 5.Ply, step = 1.Ply, tunable = false)
+addParam(minMoveCounterLmr, default = 5, min = 1, max = 15, step = 3, tunable = false)
 
-# addParam(iirMinDepth, default = 4.Ply, min = 0.Ply, max = 12.Ply, step = 1.Ply)
+addParam(iirMinDepth, default = 4.Ply, min = 0.Ply, max = 12.Ply, step = 1.Ply, tunable = false)
 
 addParam(
   maxHistoryTableValue, default = 109000, min = 1000, max = 10000000, step = 50000, tunable = false
