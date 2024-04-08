@@ -85,7 +85,7 @@ func environmentCounts(evalState: EvalState, position: Position) =
         numOurPieces = (position[color] and square.attack(1)).countSetBits
         numEnemyPieces = (position[color.opposite] and square.attack(1)).countSetBits
         numBlockers = (position[blocked] and square.attack(1)).countSetBits
-      assert numOurPieces <= 8 and numEnemyPieces <= 9 and numBlockers <= 8
+      assert numOurPieces <= 8 and numEnemyPieces <= 8 and numBlockers <= 8
       evalState.addValue(
         goodFor = color,
         environmentCounts[square][numOurPieces][numEnemyPieces][numBlockers],
