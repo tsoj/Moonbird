@@ -106,8 +106,6 @@ func search(
     if value >= beta:
       return value
 
-  let staticEval = state.eval(position)
-
   # iterate over all moves and recursively search the new positions
   for move in position.moveIterator(hashResult.bestMove, state.historyTable):
     let newPosition = position.doMove(move)
@@ -129,7 +127,7 @@ func search(
 
     # futility reduction
     if moveCounter >= minMoveCounterFutility():
-      newDepth -= futilityReduction(alpha - staticEval)
+      newDepth -= futilityReduction(alpha + state.eval(newPosition))
 
     if newDepth <= 0:
       continue
