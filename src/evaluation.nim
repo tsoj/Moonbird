@@ -78,9 +78,23 @@ func mobility(evalState: EvalState, position: Position) =
     let targets = position[color].singles.singles and not position.occupancy
     evalState.addValue(goodFor = color, mobility[targets.countSetBits])
 
+func environmentCounts(evalState: EvalState, position: Position) =
+  for color in red .. blue:
+    for square in position[color]:
+      let
+        numOurPieces = (position[color] and square.attack(1)).countSetBits
+        numEnemyPieces = (position[color.opposite] and square.attack(1)).countSetBits
+        numBlockers = (position[blocked] and square.attack(1)).countSetBits
+      assert numOurPieces <= 8 and numEnemyPieces <= 9 and numBlockers <= 8
+      evalState.addValue(
+        goodFor = color,
+        environmentCounts[square][numOurPieces][numEnemyPieces][numBlockers],
+      )
+
 func absoluteEvaluate*(evalState: EvalState, position: Position) =
   evalState.evaluate2x2Structure(position)
   evalState.mobility(position)
+  evalState.environmentCounts(position)
   evalState.addValue(goodFor = position.us, turnBonus)
 
 func absoluteEvaluate*(evalParams: EvalParams, position: Position): Value =
