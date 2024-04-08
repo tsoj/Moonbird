@@ -42,15 +42,15 @@ proc optimize(
 let startTime = now()
 
 var data: seq[Entry]
-data.loadData "res/data/trainingSet_2024-03-26-02-25-05_766cce2.bin"
-data.loadData "res/data/trainingSet_2024-04-03-00-54-04_6000_31a443c.bin"
-data.loadData "res/data/trainingSet_2024-04-03-00-56-14_6000_31a443c.bin"
+# data.loadData "res/data/trainingSet_2024-03-26-02-25-05_766cce2.bin"
+# data.loadData "res/data/trainingSet_2024-04-03-00-54-04_6000_31a443c.bin"
+# data.loadData "res/data/trainingSet_2024-04-03-00-56-14_6000_31a443c.bin"
+data.loadData "res/data/trainingSet_2024-04-08-01-24-53_6000_0e77b9d.bin"
+data.loadData "res/data/trainingSet_2024-04-08-01-26-28_6000_0e77b9d.bin"
+data.loadData "res/data/trainingSet_2024-04-08-11-05-12_6000_0e77b9d.bin"
 data.shuffle
 
 echo "Total number of entries: ", data.len
-
-# doAssert not gitHasUnstagedChanges,
-#   "Shouldn't do training data generation with unstaged changes"
 
 let startDate = now().format("yyyy-MM-dd-HH-mm-ss")
 
