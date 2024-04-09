@@ -1,6 +1,6 @@
 import types, position, bitboard, evalParams, positionUtils, movegen
 
-import std/[macros]
+import std/[macros, math]
 
 type EvaluationFunction* = proc(position: Position): Value {.noSideEffect.}
 
@@ -58,6 +58,7 @@ func get2x2Mask(square: static Square): Bitboard =
     result |= sq.toBitboard shl square.int
 
 func evaluate2x2Structure(evalState: EvalState, position: Position) =
+  var levelOneIndices: array[a1 .. g7, int]
 
   #!fmt: off
   for square in (
@@ -69,8 +70,25 @@ func evaluate2x2Structure(evalState: EvalState, position: Position) =
     a6, b6, c6, d6, e6, f6,
   ).fields:
     if ((position[red] or position[blue]) and square.get2x2Mask) != 0:
-      let index = position.maskIndex(square)
-      evalState.addValue(goodFor = red, pst[square][index])
+      levelOneIndices[square] = position.maskIndex(square)
+  #!fmt: on
+
+  #!fmt: off
+  for square in [
+    a1, b1, c1, d1,
+    a2, b2, c2, d2,
+    a3, b3, c3, d3,
+    a4, b4, c4, d4,
+  ]:
+    # TODO move diagonal one closer
+    for dirIndex, dir in [2, 14, 16]:
+      let
+        otherSquare = (square.int + dir).Square
+        bigIndex = levelOneIndices[square] + (4 ^ 4) * levelOneIndices[otherSquare]
+
+      assert levelOneIndices[square] < 4^4
+
+      evalState.addValue(goodFor = red, pst[square][dirIndex][bigIndex])
   #!fmt: on
 
 func mobility(evalState: EvalState, position: Position) =

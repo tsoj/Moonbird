@@ -7,7 +7,7 @@ export types
 type
   ParamValue = float32
   CoreEvalParams* = object
-    pst*: array[a1 .. g7, array[4 ^ 4, ParamValue]]
+    pst*: array[a1 .. g7, array[3, array[4 ^ 8, ParamValue]]]
     environmentCounts*: array[a1 .. g7, array[0..8, array[0..8, array[0..8, ParamValue]]]]
     mobility*: array[49, ParamValue]
     turnBonus*: ParamValue
