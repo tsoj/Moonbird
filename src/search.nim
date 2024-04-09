@@ -31,7 +31,7 @@ func shouldStop(state: var SearchState): bool =
 func update(
     state: var SearchState,
     position: Position,
-    bestMove: Move, # previous: Move,
+    bestMove: Move,
     depth, height: Ply,
     nodeType: NodeType,
     bestValue: Value,
@@ -111,10 +111,9 @@ func search(
     let newPosition = position.doMove(move)
     moveCounter += 1
 
-    # stop search if we exceeded maximum nodes or we got a stop signal from outside
+    # stop search if necessary
     if state.shouldStop:
-      return # TODO break
-      #break
+      return if bestValue > -valueInfinity: bestValue else: alpha
 
     var
       newDepth = depth
