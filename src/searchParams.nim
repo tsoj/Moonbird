@@ -84,7 +84,7 @@ addParam(futilityReductionDiv, default = 35, min = 10, max = 500, step = 10)
 
 addParam(nullMoveDepthSub, default = 4.Ply, min = 0.Ply, max = 10.Ply, step = 1.Ply)
 addParam(nullMoveDepthDiv, default = 2, min = 1, max = 15, step = 1)
-addParam(minFreeSquaresNullMovePruning, default = 11, min = 0, max = 49, step = 2)
+addParam(minTargetSquaresNullMovePruning, default = 11, min = 0, max = 49, step = 2)
 
 addParam(lmrDepthHalfLife, default = 47, min = 5, max = 60, step = 10)
 addParam(lmrDepthSub, default = 0.Ply, min = 0.Ply, max = 10.Ply, step = 1.Ply)

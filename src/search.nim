@@ -54,7 +54,9 @@ func search(
   ):
     return 0.Value
 
-  let hashResult = state.hashTable[].get(position.zobristKey)
+  let
+    us = position.us
+    hashResult = state.hashTable[].get(position.zobristKey)
 
   var
     alpha = alpha
@@ -93,7 +95,8 @@ func search(
 
   # null move reduction
   if height > 0 and (hashResult.isEmpty or hashResult.nodeType == cutNode) and
-      (not position.occupancy).countSetBits >= minFreeSquaresNullMovePruning():
+      (position[us].singles.singles and not position.occupancy).countSetBits >=
+      minTargetSquaresNullMovePruning():
     let value =
       -position.doMove(nullMove).search(
         state,
@@ -170,7 +173,7 @@ func search(
       nodeType = pvNode
       alpha = value
     else:
-      state.historyTable.update(move, position.us, depth, raisedAlpha = false)
+      state.historyTable.update(move, us, depth, raisedAlpha = false)
 
   if moveCounter <= 1:
     let
@@ -179,7 +182,7 @@ func search(
 
     if status in [draw, fiftyMoveRule]:
       return 0.Value
-    if status == winColor[position.us]:
+    if status == winColor[us]:
       return height.valueWin
     if status == winColor[position.enemy]:
       return -height.valueWin
