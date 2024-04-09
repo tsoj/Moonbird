@@ -33,6 +33,12 @@ func gameStatus*(position: Position): GameStatus =
   else:
     running
 
+func winColor*(status: GameStatus): Color =
+  case status:
+  of winRed: red
+  of winBlue: blue
+  else: noColor
+
 const
   fenStrings = [red: "x", blue: "o", blocked: "-", noColor: "1"]
   prettyStrings = [red: "🏶", blue: "♠", blocked: "🞓", noColor: "?"]

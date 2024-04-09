@@ -176,15 +176,13 @@ func search(
       state.historyTable.update(move, us, depth, raisedAlpha = false)
 
   if moveCounter <= 1:
-    let
-      status = position.gameStatus
-      winColor = [red: winRed, blue: winBlue]
+    let status = position.gameStatus
 
     if status in [draw, fiftyMoveRule]:
       return 0.Value
-    if status == winColor[us]:
+    if status.winColor == us:
       return height.valueWin
-    if status == winColor[position.enemy]:
+    if status.winColor == position.enemy:
       return -height.valueWin
 
   state.update(position, bestMove, depth = depth, height = height, nodeType, bestValue)
