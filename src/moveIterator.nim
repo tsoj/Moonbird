@@ -15,13 +15,13 @@ iterator moveIterator*(
   var movePriorities = newSeqOfCap[float](moves.len)
 
   for move in moves:
-    let score =
-      move.pieceDelta(position).float + (
-        when historyTable is HistoryTable:
-          historyTable.get(move, position.us) * historyMoveOrderingFactor()
-        else:
-          0.0
-      )
+    var score = move.pieceDelta(position).float
+
+    when historyTable is HistoryTable:
+      score += historyTable.get(move, position.us) * historyMoveOrderingFactor()
+
+    if move.isDouble:
+      score += doubleMoveOrderingBonus()
 
     movePriorities.add score
 

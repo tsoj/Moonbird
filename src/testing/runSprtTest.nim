@@ -46,7 +46,7 @@ try:
     discard tryRemoveFile moonbirdBinaryFile
     if execCmd("git switch " & branch) != 0:
       raise newException(CatchableError, "Failed to switch to branch " & branch)
-    if execCmd("nim native Moonbird") != 0:
+    if execCmd("nim native -f Moonbird") != 0:
       raise newException(
         CatchableError, "Failed to compile Moonbird binary for branch " & branch
       )

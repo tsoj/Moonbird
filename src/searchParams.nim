@@ -97,7 +97,9 @@ addParam(
 )
 addParam(historyTableBadMoveDivider, default = 12.7, min = 1.0, max = 100.0, step = 8.0)
 addParam(historyTableShrinkDiv, default = 1.9, min = 1.1, max = 10.0, step = 0.5)
+
 addParam(historyMoveOrderingFactor, default = 6.9, min = 0.1, max = 1000.0, step = 5.0)
+addParam(doubleMoveOrderingBonus, default = -1.0, min = -10.0, max = 10.0, step = 2.0)
 
 proc getWeatherFactoryConfig*(): string =
   result = "{"

@@ -30,7 +30,7 @@ if not dirExists workDir:
 removeDir workDir & "tuner"
 createDir workDir & "tuner"
 
-doAssert execCmd("nim native Moonbird") == 0
+doAssert execCmd("nim native -f Moonbird") == 0
 copyFileWithPermissions "bin/Moonbird-native", workDir & "tuner/Moonbird-native"
 
 copyFileWithPermissions cuteAtaxxBinary, workDir & "tuner/cuteataxx-cli"
