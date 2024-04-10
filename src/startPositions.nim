@@ -109,5 +109,5 @@ when isMainModule:
   let startPositions = getStartPositions(100_000)
 
   for p in startPositions:
-    stdout.printPosition p
+    print p
   echo startPositions.len

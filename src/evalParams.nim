@@ -8,7 +8,8 @@ type
   ParamValue = float32
   CoreEvalParams* = object
     pst*: array[4, array[a1 .. g7, array[4 ^ 8, ParamValue]]]
-    environmentCounts*: array[a1 .. g7, array[0..8, array[0..8, array[0..8, ParamValue]]]]
+    environmentCounts*:
+      array[a1 .. g7, array[0 .. 8, array[0 .. 8, array[0 .. 8, ParamValue]]]]
     mobility*: array[49, ParamValue]
     turnBonus*: ParamValue
 
@@ -94,10 +95,11 @@ proc toString*(evalParams: EvalParams): string =
     params = evalParams
 
   proc op(x: var ParamValue, y: ParamValue) =
-    for i in 0 ..< sizeof(float64):
+    doAssert x in int16.low.ParamValue .. int16.high.ParamValue
+    for i in 0 ..< sizeof(int16):
       let
         shift = charWidth * i
-        bits = cast[char]((cast[uint64](x.float64) shr shift) and 0b1111_1111)
+        bits = cast[char]((x.int16 shr shift) and 0b1111_1111)
       s.add bits
 
   doForAll(params.get, params.get, op)
@@ -106,15 +108,15 @@ proc toString*(evalParams: EvalParams): string =
 proc toEvalParams*(s: string): EvalParams =
   var
     params = newEvalParams()
-    i = 0
+    n = 0
 
   proc op(x: var ParamValue, y: ParamValue) =
-    var bits: uint64 = 0
-    for n in 0 ..< sizeof(float64):
+    var bits: int16 = 0
+    for i in 0 ..< sizeof(int16):
       let shift = charWidth * i
-      bits = bits or (cast[uint64](cast[uint8](s[i])) shl shift)
-      i += 1
-    x = cast[float64](bits)
+      bits = bits or (cast[int16](s[n]) shl shift)
+      n += 1
+    x = bits.ParamValue
 
   doForAll(params.get, params.get, op)
 

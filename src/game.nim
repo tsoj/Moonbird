@@ -6,6 +6,7 @@ type Game* {.requiresInit.} = object
   positionHistory*: seq[Position]
   evals: Table[Position, Value] = initTable[Position, Value]()
   maxNodes: int
+  adjudicateThreefold: bool
   evaluation: EvaluationFunction
   hashTable: ref HashTable
 
@@ -46,11 +47,26 @@ proc makeNextMove(game: var Game): (GameStatus, Value, Move) =
   game.evals[position] = absoluteValue
   game.positionHistory.add position.doMove pv[0]
 
-  (game.positionHistory[^1].gameStatus, absoluteValue, pv[0])
+  var gameStatus = game.positionHistory[^1].gameStatus
+
+  if game.adjudicateThreefold:
+    var counting: Table[tuple[pieces: array[red .. blocked, Bitboard], us: Color], int]
+    for position in game.positionHistory:
+      let key = (pieces: position.pieces, us: position.us)
+      if key notin counting:
+        counting[key] = 1
+      else:
+        counting[key] += 1
+        if counting[key] >= 3: 
+          gameStatus = draw
+          break
+
+  (gameStatus, absoluteValue, pv[0])
 
 func newGame*(
     startPosition: Position,
     maxNodes = 20_000,
+    adjudicateThreefold = false,
     hashTable: ref HashTable = nil,
     evaluation: EvaluationFunction = perspectiveEvaluate,
 ): Game =
@@ -58,6 +74,7 @@ func newGame*(
     positionHistory: @[startPosition],
     hashTable: hashTable,
     maxNodes: maxNodes,
+    adjudicateThreefold: adjudicateThreefold,
     evaluation: evaluation,
   )
 
@@ -72,7 +89,7 @@ proc playGame*(game: var Game, printInfo = false): float =
   if printInfo:
     echo "----------------------------"
     echo "start position:"
-    stdout.printPosition game.positionHistory[0]
+    print game.positionHistory[0]
 
   while true:
     let (gameStatus, value, move) = game.makeNextMove()
@@ -80,7 +97,7 @@ proc playGame*(game: var Game, printInfo = false): float =
     if printInfo:
       echo "--------------"
       echo "Move: " & $move
-      stdout.printPosition game.positionHistory[^1]
+      print game.positionHistory[^1]
       echo "Value: " & $value
       if gameStatus != running:
         echo gameStatus

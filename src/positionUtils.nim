@@ -34,7 +34,7 @@ func gameStatus*(position: Position): GameStatus =
     running
 
 func winColor*(status: GameStatus): Color =
-  case status:
+  case status
   of winRed: red
   of winBlue: blue
   else: noColor
@@ -92,6 +92,10 @@ func printPosition*(stream: File or Stream, position: Position) =
       stream.flush
     else:
       doAssert false
+
+func print*(position: Position) =
+  {.cast(noSideEffect).}:
+    stdout.printPosition(position)
 
 func `$`*(position: Position): string =
   {.cast(noSideEffect).}:

@@ -28,7 +28,7 @@ while not inFileStream.atEnd:
 if content.len > 0:
   for (position, value) in content[^min(numExamples, content.len - 1) ..^ 1]:
     echo "--------------"
-    stdout.printPosition position
+    print position
     echo value
 
 echo numSamples, " positions"

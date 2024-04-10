@@ -10,11 +10,12 @@ import
 import std/[strformat, terminal, options, random, streams]
 
 const someFens = [
-  "x5o/7/7/7/7/7/o5x x 0 1", "x5o/7/2-1-2/7/2-1-2/7/o5x x 0 1",
-  "x5o/7/3-3/2-1-2/3-3/7/o5x x 0 1", "7/7/7/7/7/7/7 x 0 1", "7/7/7/7/7/7/7 o 0 1",
-  "7/7/7/7/7/7/7 x 100 1", "7/7/7/7/7/7/7 o 100 1", "7/7/7/7/7/7/7 x 0 100",
-  "7/7/7/7/7/7/7 o 0 100", "7/7/7/7/7/7/7 x 100 200", "7/7/7/7/7/7/7 o 100 200",
-  "x5o/7/7/7/7/7/o5x x", "x5o/7/7/7/7/7/o5x x 0", "x5o/7/2-1-2/7/2-1-2/7/o5x x",
+  "x6/7/-------/-------/-------/7/6o x 0 1", "x5o/7/7/7/7/7/o5x x 0 1",
+  "x5o/7/2-1-2/7/2-1-2/7/o5x x 0 1", "x5o/7/3-3/2-1-2/3-3/7/o5x x 0 1",
+  "7/7/7/7/7/7/7 x 0 1", "7/7/7/7/7/7/7 o 0 1", "7/7/7/7/7/7/7 x 100 1",
+  "7/7/7/7/7/7/7 o 100 1", "7/7/7/7/7/7/7 x 0 100", "7/7/7/7/7/7/7 o 0 100",
+  "7/7/7/7/7/7/7 x 100 200", "7/7/7/7/7/7/7 o 100 200", "x5o/7/7/7/7/7/o5x x",
+  "x5o/7/7/7/7/7/o5x x 0", "x5o/7/2-1-2/7/2-1-2/7/o5x x",
   "x5o/7/2-1-2/7/2-1-2/7/o5x x 0", "7/7/7/7/7/7/7 x 0 1", "7/7/7/7/7/7/7 o 0 1",
   "x5o/7/7/7/7/7/o5x x 0 1", "x5o/7/7/7/7/7/o5x o 0 1",
   "x5o/7/2-1-2/7/2-1-2/7/o5x x 0 1", "x5o/7/2-1-2/7/2-1-2/7/o5x o 0 1",
@@ -128,7 +129,7 @@ proc testLegalMoveTest(): Option[string] =
 proc playGames(): Option[string] =
   for fen in someFens:
     try:
-      var game = newGame(fen.toPosition, maxNodes = 10_000)
+      var game = newGame(fen.toPosition, maxNodes = 5_000, adjudicateThreefold = true)
       discard game.playGame()
     except CatchableError:
       return some &"Encountered error while playing a game from start position \"{fen}\": {getCurrentExceptionMsg()}"
