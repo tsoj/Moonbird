@@ -16,7 +16,7 @@ type
   EvalParams* {.requiresInit.} = object
     data: seq[CoreEvalParams]
 
-func get*(ep: EvalParams): CoreEvalParams =
+func get*(ep: EvalParams): lent CoreEvalParams =
   ep.data[0]
 func get*(ep: var EvalParams): var CoreEvalParams =
   ep.data[0]
@@ -42,50 +42,35 @@ func doForAll[T](
       doAssert false, "Type is not not implemented for doForAll: " & $typeof(T)
 
 func `+=`*(a: var EvalParams, b: EvalParams) =
-  doForAll(
-    a.get,
-    b.get,
-    proc(x: var ParamValue, y: ParamValue) =
-      x += y
-    ,
-  )
+  proc op(x: var ParamValue, y: ParamValue) =
+    x += y
+
+  doForAll(a.get, b.get, op)
 
 func `*=`*(a: var EvalParams, b: EvalParams) =
-  doForAll(
-    a.get,
-    b.get,
-    proc(x: var ParamValue, y: ParamValue) =
-      x *= y
-    ,
-  )
+  proc op(x: var ParamValue, y: ParamValue) =
+    x *= y
+
+  doForAll(a.get, b.get, op)
 
 func `*=`*(a: var EvalParams, b: ParamValue) =
-  doForAll(
-    a.get,
-    a.get,
-    proc(x: var ParamValue, y: ParamValue) =
-      x *= b
-    ,
-  )
+  proc op(x: var ParamValue, y: ParamValue) =
+    x *= b
+
+  doForAll(a.get, a.get, op)
 
 func setAll*(a: var EvalParams, b: ParamValue) =
-  doForAll(
-    a.get,
-    a.get,
-    proc(x: var ParamValue, y: ParamValue) =
-      x = b
-    ,
-  )
+  proc op(x: var ParamValue, y: ParamValue) =
+    x = b
+
+  doForAll(a.get, a.get, op)
 
 proc setRandom*(a: var EvalParams, b: Slice[float64]) =
-  doForAll(
-    a.get,
-    a.get,
-    proc(x: var ParamValue, y: ParamValue) =
-      {.cast(noSideEffect).}:
-        x = rand(b).ParamValue
-    ,
-  )
+  proc op(x: var ParamValue, y: ParamValue) =
+    {.cast(noSideEffect).}:
+      x = rand(b).ParamValue
+
+  doForAll(a.get, a.get, op)
 
 const charWidth = 8
 
