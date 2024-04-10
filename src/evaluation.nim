@@ -74,21 +74,39 @@ func evaluate2x2Structure(evalState: EvalState, position: Position) =
   #!fmt: on
 
   #!fmt: off
-  for square in [
-    a1, b1, c1, d1,
-    a2, b2, c2, d2,
-    a3, b3, c3, d3,
-    a4, b4, c4, d4,
-  ]:
-    # TODO move diagonal one closer
-    for dirIndex, dir in [2, 14, 16]:
-      let
-        otherSquare = (square.int + dir).Square
-        bigIndex = levelOneIndices[square] + (4 ^ 4) * levelOneIndices[otherSquare]
+  var dirIndex = 0
+  for dirAndSquares in (
+    (2, (
+      a1, b1, c1, d1,
+      a2, b2, c2, d2,
+      a3, b3, c3, d3,
+      a4, b4, c4, d4,
+      a5, b5, c5, d5,
+      a6, b6, c6, d6,
+    )),
+    (14, (      
+      a1, b1, c1, d1, e1, f1,
+      a2, b2, c2, d2, e2, f2,
+      a3, b3, c3, d3, e3, f3,
+      a4, b4, c4, d4, e4, f4,
+    )),
+    (16, (      
+      a1, b1, c1, d1,
+      a2, b2, c2, d2,
+      a3, b3, c3, d3,
+      a4, b4, c4, d4,
+    )),
+  ).fields:
+    const (dir, squareList) = dirAndSquares
+    for square in squareList.fields:
+      const otherSquare = (square.int + dir).Square
+      let bigIndex = levelOneIndices[square] + (4 ^ 4) * levelOneIndices[otherSquare]
 
       assert levelOneIndices[square] < 4^4
 
-      evalState.addValue(goodFor = red, pst[square][dirIndex][bigIndex])
+      evalState.addValue(goodFor = red, pst[dirIndex][square][bigIndex])
+    
+    dirIndex += 1
   #!fmt: on
 
 func mobility(evalState: EvalState, position: Position) =
