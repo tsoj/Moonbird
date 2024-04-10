@@ -96,6 +96,12 @@ func evaluate2x2Structure(evalState: EvalState, position: Position) =
       a3, b3, c3, d3,
       a4, b4, c4, d4,
     )),
+    (12, (
+      c1, d1, e1, f1,
+      c2, d2, e2, f2,
+      c3, d3, e3, f3,
+      c4, d4, e4, f4,
+    ))
   ).fields:
     const (dir, squareList) = dirAndSquares
     for square in squareList.fields:
