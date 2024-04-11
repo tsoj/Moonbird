@@ -71,7 +71,7 @@ func search(
 
     # internal iterative reduction
     if hashResult.isEmpty and depth >= iirMinDepth():
-      depth -= 1.Ply
+      depth -= 2.Ply
 
     depth
 
