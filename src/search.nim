@@ -118,7 +118,7 @@ func search(
     if state.shouldStop:
       return if bestValue > -valueInfinity: bestValue else: alpha
 
-    if depth == 1 and move.isDouble:
+    if depth == 1 and move.isSingle:
       continue
 
     var
