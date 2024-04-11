@@ -25,7 +25,7 @@ const
   # of randomly selected leaves to get to the target number of training sample
   minNumStartPositions = 1000
   randRatio = 0.0005
-  sampleFrequencyInGameHalfmove = 40 .. 80
+  sampleFrequencyInGameHalfmove = 20 .. 40
   ratioGameResultSearchValue = 0.5
 
 doAssert not gitHasUnstagedChanges,
