@@ -55,7 +55,10 @@ func isValidSamplePosition(position: Position): bool =
 
 proc playGame(startPos: Position, hashTable: ref HashTable): seq[(Position, float)] =
   var game = newGame(
-    startPosition = startPos, maxNodes = sampleGameSearchNodes, hashTable = hashTable
+    startPosition = startPos,
+    maxNodes = sampleGameSearchNodes,
+    adjudicateThreefold = true,
+    hashTable = hashTable,
   )
   let
     gameResult = game.playGame # (printInfo = true)
