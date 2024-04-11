@@ -118,9 +118,6 @@ func search(
     if state.shouldStop:
       return if bestValue > -valueInfinity: bestValue else: alpha
 
-    if depth == 1 and move.isSingle:
-      continue
-
     var
       newDepth = depth
       newBeta = beta
@@ -131,7 +128,7 @@ func search(
       lmrMoveCounter += 1
 
     # futility reduction
-    if moveCounter >= minMoveCounterFutility():
+    if moveCounter >= minMoveCounterFutility() and newDepth > 0:
       newDepth -= futilityReduction(alpha + state.eval(newPosition))
 
     if newDepth <= 0:
