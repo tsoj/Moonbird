@@ -116,9 +116,10 @@ func evaluate2x2Structure(evalState: EvalState, position: Position) =
   #!fmt: on
 
 func mobility(evalState: EvalState, position: Position) =
+  let phase = position.occupancy.countSetBits.clamp(0, 49)
   for color in red .. blue:
     let targets = position[color].singles.singles and not position.occupancy
-    evalState.addValue(goodFor = color, mobility[targets.countSetBits])
+    evalState.addValue(goodFor = color, mobility[phase][targets.countSetBits])
 
 func environmentCounts(evalState: EvalState, position: Position) =
   for color in red .. blue:
