@@ -110,7 +110,7 @@ func evaluate2x2Structure(evalState: EvalState, position: Position) =
 
       assert levelOneIndices[square] < 4^4
 
-      evalState.addValue(goodFor = red, pst[dirIndex][square][bigIndex])
+      evalState.addValue(goodFor = red, pst[position.us][dirIndex][square][bigIndex])
     
     dirIndex += 1
   #!fmt: on
