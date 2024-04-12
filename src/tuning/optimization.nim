@@ -46,6 +46,7 @@ data.loadData "res/data/trainingSet_2024-04-08-01-24-53_6000_0e77b9d.bin"
 data.loadData "res/data/trainingSet_2024-04-08-01-26-28_6000_0e77b9d.bin"
 data.loadData "res/data/trainingSet_2024-04-08-11-05-12_6000_0e77b9d.bin"
 data.loadData "res/data/trainingSet_2024-04-11-02-05-49_6000_0ac4353.bin"
+data.loadData "res/data/trainingSet_2024-04-12-01-37-52_1000_bc57aac.bin"
 data.shuffle
 
 echo "Total number of entries: ", data.len
