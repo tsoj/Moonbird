@@ -31,23 +31,25 @@ template addValue(evalState: EvalState, goodFor: Color, parameter: untyped) =
       value *= -1
     evalState.absoluteValue[] += value
 
-func maskIndex*(position: Position, square: static Square): int =
+func maskIndex*(
+    position: Position, square: static Square, us, enemy, blocked: Bitboard
+): int =
   static:
     doAssert square.fileNumber <= 5
     doAssert square.rankNumber <= 5
 
   let
-    redPieces = position[red] shr square.int8
-    bluePieces = position[blue] shr square.int8
-    blockedPieces = position[blocked] shr square.int8
+    ourPieces = us shr square.int8
+    enemyPieces = enemy shr square.int8
+    blockedPieces = blocked shr square.int8
 
   var counter = 1
 
   for sq in [a2, b2, a1, b1]:
     let bit = sq.toBitboard
-    if (redPieces and bit) != 0:
+    if (ourPieces and bit) != 0:
       result += counter * 1
-    elif (bluePieces and bit) != 0:
+    elif (enemyPieces and bit) != 0:
       result += counter * 2
     elif (blockedPieces and bit) != 0:
       result += counter * 3
@@ -58,6 +60,10 @@ func get2x2Mask(square: static Square): Bitboard =
     result |= sq.toBitboard shl square.int
 
 func evaluate2x2Structure(evalState: EvalState, position: Position) =
+  let
+    us = position.us
+    enemy = position.enemy
+
   var levelOneIndices: array[a1 .. g7, int]
 
   #!fmt: off
@@ -70,7 +76,7 @@ func evaluate2x2Structure(evalState: EvalState, position: Position) =
     a6, b6, c6, d6, e6, f6,
   ).fields:
     if ((position[red] or position[blue]) and square.get2x2Mask) != 0:
-      levelOneIndices[square] = position.maskIndex(square)
+      levelOneIndices[square] = position.maskIndex(square, position[us], position[enemy], position[blocked])
   #!fmt: on
 
   #!fmt: off
@@ -110,7 +116,7 @@ func evaluate2x2Structure(evalState: EvalState, position: Position) =
 
       assert levelOneIndices[square] < 4^4
 
-      evalState.addValue(goodFor = red, pst[position.us][dirIndex][square][bigIndex])
+      evalState.addValue(goodFor = us, pst[dirIndex][square][bigIndex])
     
     dirIndex += 1
   #!fmt: on
