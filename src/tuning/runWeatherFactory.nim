@@ -2,8 +2,6 @@ import ../searchParams, ../startPositions
 
 import std/[osproc, os, strformat]
 
-# TODO fix code duplication with testing/runSprtTest.nim
-
 const
   minNumGames = 24
   tc = 8

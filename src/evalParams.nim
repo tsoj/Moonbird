@@ -11,7 +11,7 @@ type
     environmentCounts*:
       array[a1 .. g7, array[0 .. 8, array[0 .. 8, array[0 .. 8, ParamValue]]]]
     mobility*: array[0 .. 49, array[0 .. 49, ParamValue]]
-    turnBonus*: ParamValue # TODO check if it is still necessary
+    turnBonus*: ParamValue
 
   EvalParams* {.requiresInit.} = object
     data: seq[CoreEvalParams]

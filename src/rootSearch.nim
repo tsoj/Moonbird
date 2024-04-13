@@ -4,21 +4,6 @@ import
 
 import std/[strformat]
 
-# TODO remove catching errors here, as we don't use threads for search here
-func launchSearch(position: Position, state: var SearchState, depth: Ply): int =
-  try:
-    position.search(state, depth = depth)
-    return state.countedNodes
-  except CatchableError:
-    {.cast(noSideEffect).}:
-      debugEcho "Caught exception: ", getCurrentExceptionMsg()
-      debugEcho getCurrentException().getStackTrace()
-  except Exception:
-    {.cast(noSideEffect).}:
-      debugEcho "Caught exception: ", getCurrentExceptionMsg()
-      debugEcho getCurrentException().getStackTrace()
-      quit(QuitFailure)
-
 iterator iterativeDeepeningSearch*(
     positionHistory: seq[Position],
     hashTable: var HashTable,
@@ -44,7 +29,8 @@ iterator iterativeDeepeningSearch*(
 
   hashTable.age()
   for depth in 1.Ply .. targetDepth:
-    let nodes = launchSearch(position, searchState, depth)
+    position.search(searchState, depth)
+    let nodes = searchState.countedNodes
     totalNodes += nodes
 
     var
