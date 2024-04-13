@@ -14,7 +14,23 @@ func moves*(position: Position): seq[Move] =
   if result.len == 0:
     result.add nullMove
 
+func isLegal*(move: Move, position: Position): bool =
+  if move == noMove:
+    false
+  elif move == nullMove:
+    nullMove in position.moves
+  elif move.isSingle:
+    move.target != noSquare and (position[position.us] and move.target.singles) != 0 and
+      (position.occupancy and move.target.toBitboard) == 0
+  else:
+    move.source != noSquare and move.target != noSquare and
+      (position[position.us] and move.source.toBitboard) != 0 and
+      (position.occupancy and move.target.toBitboard) == 0 and
+      (move.target.toBitboard and move.source.doubles) != 0
+
 func doMove*(position: Position, move: Move): Position =
+  assert move.isLegal(position)
+
   let
     us = position.us
     enemy = position.enemy
@@ -49,20 +65,6 @@ func doMove*(position: Position, move: Move): Position =
   result.us = enemy
 
   result.zobristKey ^= red.ZobristKey xor blue.ZobristKey
-
-func isLegal*(move: Move, position: Position): bool =
-  if move == noMove:
-    false
-  elif move == nullMove:
-    nullMove in position.moves
-  elif move.isSingle:
-    move.target != noSquare and (position[position.us] and move.target.singles) != 0 and
-      (position.occupancy and move.target.toBitboard) == 0
-  else:
-    move.source != noSquare and move.target != noSquare and
-      (position[position.us] and move.source.toBitboard) != 0 and
-      (position.occupancy and move.target.toBitboard) == 0 and
-      (move.target.toBitboard and move.source.doubles) != 0
 
 func pieceDelta*(move: Move, position: Position): int =
   if move == nullMove:

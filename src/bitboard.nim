@@ -71,7 +71,6 @@ func mirrorVertically*(bitboard: Bitboard): Bitboard =
     result |= (bitboard and r1) shl shiftAmount
     result |= (bitboard and r2) shr shiftAmount
 
-
 func rotate90*(bitboard: Bitboard): Bitboard =
   for sq in bitboard:
     result |=

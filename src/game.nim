@@ -57,7 +57,7 @@ proc makeNextMove(game: var Game): (GameStatus, Value, Move) =
         counting[key] = 1
       else:
         counting[key] += 1
-        if counting[key] >= 3: 
+        if counting[key] >= 3:
           gameStatus = draw
           break
 

@@ -8,6 +8,7 @@ import
   uaiSearch,
   movegen,
   perft,
+  uaiInfos,
   ../tests/tests
 
 import std/[strutils, strformat]
@@ -55,7 +56,10 @@ proc moves(position: Position, params: seq[string]): seq[Position] =
   result = @[position]
 
   for i in 0 ..< params.len:
-    result.add result[^1].doMove(params[i].toMove)
+    let move = params[i].toMove
+    if not move.isLegal(position):
+      raise newException(ValueError, "Illegal move: " & $move)
+    result.add result[^1].doMove(move)
 
 proc setPosition(uaiState: var UaiState, params: seq[string]) =
   var
@@ -123,7 +127,7 @@ proc go(uaiState: var UaiState, params: seq[string]) =
 
 proc uaiNewGame(uaiState: var UaiState) =
   uaiState.hashTable.clear()
-  uaiState.history.setLen(0)
+  uaiState.history = @[startPos]
 
 proc test() =
   discard runTests()
@@ -141,6 +145,8 @@ proc perft(uaiState: UaiState, params: seq[string]) =
     echo "Missing depth parameter"
 
 proc uaiLoop*() =
+  printLogo()
+
   var uaiState = UaiState(history: @[startPos], hashtable: newHashTable())
   uaiState.hashTable.setByteSize(sizeInBytes = defaultHashSizeMB * megaByteToByte)
 
@@ -173,12 +179,21 @@ proc uaiLoop*() =
         uaiState.perft(params[1 ..^ 1])
       of "test":
         test()
+      of "about":
+        about(extra = "extra" in params)
+      of "help":
+        printHelp()
       else:
         try:
           uaiState.setPosition(@["fen"] & params)
         except CatchableError:
-          echo "Unknown command: ", params[0]
-          echo "Use 'help'"
+          try:
+            uaiState.setPosition(
+              @["fen"] & uaiState.currentPosition.fen & "moves" & params
+            )
+          except CatchableError:
+            echo "Unknown command: ", params[0]
+            echo "Use 'help'"
     except EOFError:
       echo "Quitting because of reaching end of file"
       break
