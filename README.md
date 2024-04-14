@@ -1,6 +1,6 @@
 <div align="center">
 <p><h1>Moonbird</h1>
-<img src="./res/logo.png" width="384px" style="border-radius: 40px;">
+<img src="./res/logo.png" width="384px" style="border-radius: 20px;">
 <i><h4>Ataxx engine written in Nim</h4></i>
 </h1>
 </div>

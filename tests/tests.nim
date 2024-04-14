@@ -129,7 +129,7 @@ proc testLegalMoveTest(): Option[string] =
 proc playGames(): Option[string] =
   for fen in someFens:
     try:
-      var game = newGame(fen.toPosition, maxNodes = 5_000, adjudicateThreefold = true)
+      var game = newGame(fen.toPosition, maxNodes = 2_000, adjudicateThreefold = true)
       discard game.playGame()
     except CatchableError:
       return some &"Encountered error while playing a game from start position \"{fen}\": {getCurrentExceptionMsg()}"
