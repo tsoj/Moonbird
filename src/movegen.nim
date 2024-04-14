@@ -29,7 +29,6 @@ func isLegal*(move: Move, position: Position): bool =
       (move.target.toBitboard and move.source.doubles) != 0
 
 func doMove*(position: Position, move: Move): Position =
-  assert move.isLegal(position)
 
   let
     us = position.us
@@ -42,6 +41,7 @@ func doMove*(position: Position, move: Move): Position =
   result.halfmovesPlayed += 1
 
   if move != nullMove:
+    assert move.isLegal(position)
     assert source != noSquare and target != noSquare
 
     if move.isDouble:
