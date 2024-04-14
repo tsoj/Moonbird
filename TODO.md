@@ -1,2 +1,0 @@
-- Fix situation with --passL:"-static"
-    - Want it for distributing but doesn't build on all systems
