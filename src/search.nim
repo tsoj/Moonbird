@@ -36,7 +36,7 @@ func update(
     nodeType: NodeType,
     bestValue: Value,
 ) =
-  if bestMove != noMove and bestValue.abs < valueInfinity:
+  if bestMove != noMove and bestValue.abs < valueInfinity and not state.shouldStop:
     state.hashTable[].add(position.zobristKey, nodeType, bestValue, depth, bestMove)
     if nodeType != allNode:
       state.historyTable.update(bestMove, position.us, depth, raisedAlpha = true)
@@ -116,7 +116,7 @@ func search(
 
     # stop search if necessary
     if state.shouldStop:
-      return if bestValue > -valueInfinity: bestValue else: alpha
+      return
 
     var
       newDepth = depth
