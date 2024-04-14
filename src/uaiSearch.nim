@@ -28,7 +28,7 @@ proc infoString(
     time: Seconds,
     hashFull: int,
 ): string =
-  let nps = int(nodes.float / time.float)
+  let nps = int(nodes.float / max(time.float, 0.000001))
   result =
     fmt"info depth {iteration+1:>2} time {int(time * 1000.0):>6} nodes {nodes:>9} nps {nps:>7} hashfull {hashFull:>4} score cp {value:>4} pv"
   for move in pv:
