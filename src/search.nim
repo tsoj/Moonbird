@@ -2,6 +2,9 @@ import
   types, bitboard, position, positionUtils, move, searchUtils, moveIterator, hashTable,
   searchParams, evaluation, utils, movegen
 
+import std/[atomics]
+export atomics
+
 func futilityReduction(value: Value): Ply =
   clampToType(value.int div futilityReductionDiv(), Ply)
 
@@ -13,7 +16,7 @@ func lmrDepth(depth: Ply, lmrMoveCounter: int): Ply =
   result = ((depth.int * halfLife) div (halfLife + lmrMoveCounter)).Ply - lmrDepthSub()
 
 type SearchState* {.requiresInit.} = object
-  stop*: bool
+  stop*: ptr Atomic[bool]
   hashTable*: ptr HashTable
   historyTable*: HistoryTable
   repetition*: Repetition
@@ -25,8 +28,8 @@ type SearchState* {.requiresInit.} = object
 func shouldStop(state: var SearchState): bool =
   if state.countedNodes >= state.maxNodes or
       ((state.countedNodes mod 1998) == 1107 and secondsSince1970() >= state.stopTime):
-    state.stop = true
-  state.stop
+    state.stop[].store true
+  state.stop[].load
 
 func update(
     state: var SearchState,
@@ -190,7 +193,6 @@ func search(
   bestValue
 
 func search*(position: Position, state: var SearchState, depth: Ply) =
-  state.stop = false
   state.countedNodes = 0
 
   let hashResult = state.hashTable[].get(position.zobristKey)

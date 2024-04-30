@@ -2,7 +2,13 @@ import
   types, position, positionUtils, move, search, hashTable, searchUtils, evaluation,
   utils, movegen
 
+import malebolgia
+
 import std/[strformat]
+
+func launchSearch(position: Position, state: ptr SearchState, depth: Ply) =
+  position.search(state[], depth = depth)
+  state[].stop[].store(true)
 
 iterator iterativeDeepeningSearch*(
     positionHistory: seq[Position],
@@ -10,14 +16,26 @@ iterator iterativeDeepeningSearch*(
     targetDepth: Ply,
     maxNodes: int,
     stopTime: Seconds,
+    numThreads: int,
     eval: EvaluationFunction,
 ): tuple[pv: seq[Move], value: Value, nodes: int] {.noSideEffect.} =
   doAssert positionHistory.len >= 1, "Need at least one position"
   let position = positionHistory[^1]
   var
-    totalNodes = 0'i64
-    searchState = SearchState(
-      stop: false,
+    totalNodes = 0
+    searchStates: seq[SearchState]
+    stop: Atomic[bool]
+
+  {.cast(noSideEffect).}:
+    var threadpool = createMaster()
+
+  doAssert numThreads >= 1
+  doAssert numThreads == 1 or maxNodes == int.high,
+    "Node search is not supported with more than one thread"
+
+  for _ in 0 ..< numThreads:
+    searchStates.add SearchState(
+      stop: addr stop,
       countedNodes: 0,
       hashTable: addr hashTable,
       historyTable: HistoryTable(),
@@ -29,8 +47,18 @@ iterator iterativeDeepeningSearch*(
 
   hashTable.age()
   for depth in 1.Ply .. targetDepth:
-    position.search(searchState, depth)
-    let nodes = searchState.countedNodes
+    stop.store(false)
+    if numThreads == 1:
+      launchSearch(position, addr searchStates[0], depth)
+    else:
+      {.cast(noSideEffect).}:
+        threadpool.awaitAll:
+          for i in 0 ..< numThreads:
+            threadpool.spawn launchSearch(position, addr searchStates[i], depth)
+
+    var nodes = 0
+    for state in searchStates:
+      nodes += state.countedNodes
     totalNodes += nodes
 
     var
@@ -44,5 +72,5 @@ iterator iterativeDeepeningSearch*(
 
     yield (pv: pv, value: value, nodes: nodes)
 
-    if searchState.stop or totalNodes >= maxNodes:
+    if secondsSince1970() >= stopTime or totalNodes >= maxNodes:
       break

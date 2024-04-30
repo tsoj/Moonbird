@@ -11,6 +11,7 @@ type SearchInfo* {.requiresInit.} = object
     [red: Seconds.high, blue: Seconds.high]
   moveTime*: Seconds = Seconds.high
   nodes*: int = int.high
+  numThreads*: int = 4
   eval*: EvaluationFunction = perspectiveEvaluate
 
 type MoveTime = object
@@ -65,6 +66,7 @@ iterator iterativeTimeManagedSearch*(
     targetDepth = searchInfo.targetDepth,
     maxNodes = searchInfo.nodes,
     stopTime = start + calculatedMoveTime.maxTime,
+    numThreads = searchInfo.numThreads,
     eval = searchInfo.eval,
   ):
     let
