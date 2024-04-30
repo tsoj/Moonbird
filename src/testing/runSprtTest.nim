@@ -59,7 +59,7 @@ createStartPositionFile fenFileName, maxNumGames
 let cuteataxxSettings =
   %*{
     "games": 100_000,
-    "concurrency": 7,#max(1, countProcessors() - 2), # TODO go back to dynamic thread number selection
+    "concurrency": max(1, countProcessors() - 2),
     "ratinginterval": 100,
     "verbose": false,
     "debug": false,
