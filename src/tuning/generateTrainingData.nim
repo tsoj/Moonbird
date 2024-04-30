@@ -101,6 +101,7 @@ openingSearchNodes.store(
     (expectedNumPliesPerGame.float * randRatio * openingPositions.len.float)
 )
 
+echo fmt"{outputFilename = }"
 echo fmt"{ThreadPoolSize = }"
 echo fmt"{targetTrainingSamples = }"
 echo fmt"{sampleGameSearchNodes = }"
