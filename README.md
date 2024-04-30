@@ -21,7 +21,7 @@ nim default Moonbird
 
 ### Run training data generation
 ```shell
-nimble install taskpools@0.0.5
+nimble install malebolgia@1.3.2
 # Arguments are: sampleGameSearchNodes targetTrainingSamples useOnlyHalfCPU
 nim genData --run Moonbird 6_000 50_000_000 false
 ```

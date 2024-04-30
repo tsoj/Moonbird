@@ -8,7 +8,7 @@ import
   ../startPositions,
   tuningUtils
 
-import taskpools
+import malebolgia
 
 import std/[os, random, locks, atomics, streams, strformat, times, cpuinfo, strutils]
 
@@ -19,6 +19,9 @@ let
   sampleGameSearchNodes = commandLineParams()[0].parseInt
   targetTrainingSamples = commandLineParams()[1].parseInt
   useOnlyHalfCPU = commandLineParams()[2].parseBool
+
+doAssert not useOnlyHalfCPU or ThreadPoolSize <= max(1, countProcessors() div 2),
+  "To use only half half of the CPU, the program must be compiled with the switch \"--define:halfCPU\""
 
 const
   # We need a minimum number of start positions, as otherwise it's difficult to adjust the number
@@ -36,14 +39,6 @@ let
   outDir = "res/data/"
   outputFilename =
     fmt"{outDir}trainingSet_{startDate}_{sampleGameSearchNodes}_{versionOrId()}.bin"
-  numThreads = max(
-    1,
-    if useOnlyHalfCPU:
-      countProcessors() div 2
-    else:
-      countProcessors() - 2
-    ,
-  )
 
 discard existsOrCreateDir outDir
 doAssert not fileExists outputFilename,
@@ -106,7 +101,7 @@ openingSearchNodes.store(
     (expectedNumPliesPerGame.float * randRatio * openingPositions.len.float)
 )
 
-echo fmt"{numThreads = }"
+echo fmt"{ThreadPoolSize = }"
 echo fmt"{targetTrainingSamples = }"
 echo fmt"{sampleGameSearchNodes = }"
 echo fmt"{openingSearchNodes.load = }"
@@ -156,13 +151,12 @@ proc findStartPositionsAndPlay(startPos: Position, stringIndex: string) =
 
 let startTime = now()
 
-var threadpool = Taskpool.new(numThreads = numThreads)
+var threadpool = createMaster()
 
-for i, position in openingPositions:
-  let stringIndex = fmt"{i+1}/{openingPositions.len}"
-  threadpool.spawn position.findStartPositionsAndPlay(stringIndex)
-
-threadpool.syncAll()
+threadpool.awaitAll:
+  for i, position in openingPositions:
+    let stringIndex = fmt"{i+1}/{openingPositions.len}"
+    threadpool.spawn position.findStartPositionsAndPlay(stringIndex)
 
 echo "Wrote to file ", outputFilename
 echo "Total time: ", now() - startTime

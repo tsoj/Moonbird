@@ -1,5 +1,7 @@
 import src/version
 
+import std/[strutils, strformat]
+
 #!fmt: off
 
 # Default flags
@@ -8,6 +10,17 @@ import src/version
 --cc:clang
 --threads:on
 --styleCheck:hint
+
+var threadPoolSize = 1024
+
+doAssert defined(linux) or not (defined(halfCPU) or defined(almostFullCPU)), "Switches halfCPU and almostFullCPU are only supported on Linux"
+
+if defined(halfCPU):
+  threadPoolSize = max(1, staticExec("nproc").parseInt div 2)
+elif defined(almostFullCPU):
+  threadPoolSize = max(1, staticExec("nproc").parseInt - 2)
+
+switch("define", fmt"ThreadPoolSize={threadPoolSize}")
 
 proc lto() =
   --passC:"-flto"
