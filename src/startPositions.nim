@@ -2,7 +2,7 @@ import bitboard, position, positionUtils, movegen
 
 export bitboard, position
 
-import std/[sets, tables, random]
+import std/[random]
 
 const startPositionsFileName = "res/ply3_fair.txt"
 
