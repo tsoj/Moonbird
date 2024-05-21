@@ -152,7 +152,7 @@ proc findStartPositionsAndPlay(startPos: Position, stringIndex: string) =
 
 let startTime = now()
 
-var threadpool = createMaster()
+var threadpool = createMaster(activeProducer = true)
 
 threadpool.awaitAll:
   for i, position in openingPositions:
