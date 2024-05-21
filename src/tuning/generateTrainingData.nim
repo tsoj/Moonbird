@@ -36,7 +36,7 @@ doAssert not gitHasUnstagedChanges,
 
 let
   startDate = now().format("yyyy-MM-dd-HH-mm-ss")
-  outDir = "res/data/"
+  outDir = "res/data/no_gaps/"
   outputFilename =
     fmt"{outDir}trainingSet_{startDate}_{sampleGameSearchNodes}_{versionOrId()}.bin"
 
