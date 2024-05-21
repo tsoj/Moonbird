@@ -13,13 +13,17 @@ import
 
 import std/[strutils, strformat]
 
+import malebolgia
+
 const
   defaultHashSizeMB = 4
   maxHashSizeMB = 1_048_576
+  defaultNumThreads = 1
 
 type UaiState {.requiresInit.} = object
   history: seq[Position]
   hashTable: HashTable
+  numThreads: int
 
 func currentPosition(uaiState: UaiState): Position =
   doAssert uaiState.history.len >= 1
@@ -30,17 +34,26 @@ proc uai(uaiState: var UaiState) =
   echo "id author Jost Triller"
   echo "option name Hash type spin default ",
     defaultHashSizeMB, " min 1 max ", maxHashSizeMB
+  echo "option name Threads type spin default ",
+    defaultNumThreads, " min 1 max ", ThreadPoolSize
   printUaiSearchParams()
   echo "uaiok"
 
 proc setOption(uaiState: var UaiState, params: seq[string]) =
   if params.len == 4 and params[0] == "name" and params[2] == "value":
-    if params[1].toLowerAscii == "Hash".toLowerAscii:
+    case params[1].toLowerAscii
+    of "Hash".toLowerAscii:
       let newHashSizeMB = params[3].parseInt
       if newHashSizeMB < 1 or newHashSizeMB > maxHashSizeMB:
         echo "Invalid value"
       else:
         uaiState.hashTable.setByteSize(sizeInBytes = newHashSizeMB * megaByteToByte)
+    of "Threads".toLowerAscii:
+      let newNumThreads = params[3].parseInt
+      if newNumThreads in 1 .. ThreadPoolSize:
+        uaiState.numThreads = newNumThreads
+      else:
+        echo "Invalid value"
     else:
       if hasSearchOption(params[1]):
         setSearchOption(params[1], params[3].parseInt)
@@ -99,6 +112,7 @@ proc go(uaiState: var UaiState, params: seq[string]) =
     timeLeft: [red: Seconds.high, blue: Seconds.high],
     moveTime: Seconds.high,
     nodes: int.high,
+    numThreads: uaiState.numThreads,
   )
 
   for i in 0 ..< params.len:
@@ -147,7 +161,9 @@ proc perft(uaiState: UaiState, params: seq[string]) =
 proc uaiLoop*() =
   printLogo()
 
-  var uaiState = UaiState(history: @[startPos], hashtable: newHashTable())
+  var uaiState = UaiState(
+    history: @[startPos], hashtable: newHashTable(), numThreads: defaultNumThreads
+  )
   uaiState.hashTable.setByteSize(sizeInBytes = defaultHashSizeMB * megaByteToByte)
 
   while true:
