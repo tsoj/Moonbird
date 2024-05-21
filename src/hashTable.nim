@@ -161,9 +161,8 @@ func getPv*(ht: var HashTable, position: Position): seq[Move] =
   var encounteredZobristKeys: seq[ZobristKey]
   var currentPosition = position
   while true:
-    for key in encounteredZobristKeys:
-      if key == currentPosition.zobristKey:
-        return result
+    if currentPosition.zobristKey in encounteredZobristKeys:
+      return result
     encounteredZobristKeys.add(currentPosition.zobristKey)
     let entry = ht.get(currentPosition.zobristKey)
 

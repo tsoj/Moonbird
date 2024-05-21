@@ -70,7 +70,7 @@ proc moves(position: Position, params: seq[string]): seq[Position] =
 
   for i in 0 ..< params.len:
     let move = params[i].toMove
-    if not move.isLegal(position):
+    if not move.isLegal(result[^1]):
       raise newException(ValueError, "Illegal move: " & $move)
     result.add result[^1].doMove(move)
 
