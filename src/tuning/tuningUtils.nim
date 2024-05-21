@@ -30,6 +30,9 @@ proc loadData*(
       position = inFileStream.readPosition
       value = inFileStream.readFloat64
 
+    if position[blocked] != 0:
+      continue
+
     data.add Entry(position: position, outcome: value)
     numEntries += 1
 

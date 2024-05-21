@@ -32,7 +32,7 @@ template addValue(evalState: EvalState, goodFor: Color, parameter: untyped) =
     evalState.absoluteValue[] += value
 
 func maskIndex*(
-    position: Position, square: static Square, us, enemy, blocked: Bitboard
+    position: Position, square: static Square, us, enemy: Bitboard
 ): int =
   static:
     doAssert square.fileNumber <= 5
@@ -41,7 +41,6 @@ func maskIndex*(
   let
     ourPieces = us shr square.int8
     enemyPieces = enemy shr square.int8
-    blockedPieces = blocked shr square.int8
 
   var counter = 1
 
@@ -51,9 +50,7 @@ func maskIndex*(
       result += counter * 1
     elif (enemyPieces and bit) != 0:
       result += counter * 2
-    elif (blockedPieces and bit) != 0:
-      result += counter * 3
-    counter *= 4
+    counter *= 3
 
 func get2x2Mask(square: static Square): Bitboard =
   for sq in [a2, b2, a1, b1]:
@@ -76,7 +73,7 @@ func evaluate2x2Structure(evalState: EvalState, position: Position) =
     a6, b6, c6, d6, e6, f6,
   ).fields:
     if ((position[red] or position[blue]) and square.get2x2Mask) != 0:
-      levelOneIndices[square] = position.maskIndex(square, position[us], position[enemy], position[blocked])
+      levelOneIndices[square] = position.maskIndex(square, position[us], position[enemy])
   #!fmt: on
 
   #!fmt: off
@@ -112,9 +109,9 @@ func evaluate2x2Structure(evalState: EvalState, position: Position) =
     const (dir, squareList) = dirAndSquares
     for square in squareList.fields:
       const otherSquare = (square.int + dir).Square
-      let bigIndex = levelOneIndices[square] + (4 ^ 4) * levelOneIndices[otherSquare]
+      let bigIndex = levelOneIndices[square] + (3 ^ 4) * levelOneIndices[otherSquare]
 
-      assert levelOneIndices[square] < 4^4
+      assert levelOneIndices[square] < 3^4
 
       evalState.addValue(goodFor = us, pst[dirIndex][square][bigIndex])
     
@@ -133,11 +130,10 @@ func environmentCounts(evalState: EvalState, position: Position) =
       let
         numOurPieces = (position[color] and square.attack(1)).countSetBits
         numEnemyPieces = (position[color.opposite] and square.attack(1)).countSetBits
-        numBlockers = (position[blocked] and square.attack(1)).countSetBits
-      assert numOurPieces <= 8 and numEnemyPieces <= 8 and numBlockers <= 8
+      assert numOurPieces <= 8 and numEnemyPieces <= 8
       evalState.addValue(
         goodFor = color,
-        environmentCounts[square][numOurPieces][numEnemyPieces][numBlockers],
+        environmentCounts[square][numOurPieces][numEnemyPieces],
       )
 
 func absoluteEvaluate*(evalState: EvalState, position: Position) =
