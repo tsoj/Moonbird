@@ -50,6 +50,14 @@ data.loadData "res/data/trainingSet_2024-04-12-01-37-52_1000_bc57aac.bin"
 data.loadData "res/data/trainingSet_2024-04-13-03-40-00_1000_6ca7f8d.bin"
 data.loadData "res/data/trainingSet_2024-04-13-03-38-27_1000_6ca7f8d.bin"
 data.loadData "res/data/trainingSet_2024-04-13-03-39-29_1000_6ca7f8d.bin"
+data.loadData "res/data/no_gaps/trainingSet_2024-05-22-00-27-10_1000_2932d88.bin"
+data.loadData "res/data/no_gaps/trainingSet_2024-05-22-00-28-06_1000_2932d88.bin"
+data.loadData "res/data/no_gaps/trainingSet_2024-05-22-00-37-08_1000_2932d88.bin"
+data.loadData "res/data/no_gaps/trainingSet_2024-05-22-01-32-49_1000_ff75da3.bin"
+data.loadData "res/data/no_gaps/trainingSet_2024-05-22-01-32-54_1000_ff75da3.bin"
+data.loadData "res/data/no_gaps/trainingSet_2024-05-22-02-31-05_1000_ff75da3.bin"
+data.loadData "res/data/no_gaps/trainingSet_2024-05-22-02-32-29_1000_ff75da3.bin"
+data.loadData "res/data/no_gaps/trainingSet_2024-05-22-12-14-31_1000_ff75da3.bin"
 data.shuffle
 
 echo "Total number of entries: ", data.len
