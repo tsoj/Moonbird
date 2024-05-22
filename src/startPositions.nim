@@ -14,6 +14,21 @@ const
 static:
   doAssert startPiecePositions == startPos.occupancy
 
+func balance(position: Position, depth: int, maxAllowedInbalance: int): int =
+  let
+    us = position.us
+    enemy = position.enemy
+
+  if depth <= 0:
+    return position[us].countSetBits - position[enemy].countSetBits
+
+  result = int.low
+  for move in position.moves:
+    let newPosition = position.doMove move
+    result = max(result, -newPosition.balance(depth - 1, maxAllowedInbalance))
+    if result > maxAllowedInbalance:
+      break
+
 func addBlockers(bitboard: Bitboard, howMany: int): seq[Bitboard] =
   if howMany <= 0:
     return @[bitboard]
@@ -69,37 +84,44 @@ func getStartPositions*(
       maxSetSize = max(maxSetSize, s.len)
     maxSetSize
 
+  doAssert 0 in startPositions, "There should be at least one positions with no blocks."
+
   let targetNumPositionsPerBlockerNum =
     max(maxSetSize, minNumPositions div startPositions.len + 1)
+  for (numBlocks, s) in startPositions.mpairs:
+    block findNewPositions:
+      while true:
+        var newPositions: seq[Position]
+        for pos in s:
+          for move in pos.moves:
+            var newPosition = pos.doMove(move)
+            newPosition.halfmoveClock = startPos.halfmoveClock
+            newPosition.halfmovesPlayed = startPos.halfmovesPlayed
 
-  for (num, s) in startPositions.mpairs:
-    while s.len < targetNumPositionsPerBlockerNum:
-      var newPositions: seq[Position]
-      for pos in s:
-        for move in pos.moves:
-          newPositions.add pos.doMove(move)
-          newPositions[^1].halfmoveClock = startPos.halfmoveClock
-          newPositions[^1].halfmovesPlayed = startPos.halfmovesPlayed
+            if pos.gameStatus == running and
+                newPosition.balance(depth = 2, maxAllowedInbalance = 0).abs == 0:
+              newPositions.add newPosition
 
-      for pos in newPositions:
-        let
-          numRed = pos[red].countSetBits
-          numBlue = pos[blue].countSetBits
-        if abs(numRed - numBlue) <= max(3, min(numRed, numBlue) div 4) and
-            pos.gameStatus == running:
+        for pos in newPositions:
           s.incl pos
           if s.len >= targetNumPositionsPerBlockerNum:
-            break
+            break findNewPositions
 
+  var numEmpty = 0
   for (num, s) in startPositions.pairs:
     for pos in s:
+      if pos[blocked] == 0:
+        numEmpty += 1
       result.add pos
+
+  {.cast(noSideEffect).}:
+    var rg = initRand()
+  rg.shuffle(result)
 
 proc createStartPositionFile*(
     fileName: string, numPositions: int, maxNumBlockers: int = defaultMaxNumBlockers
 ) =
   var positions = getStartPositions(numPositions, defaultMaxNumBlockers)
-  positions.shuffle
   let fenFile = open(fileName, fmWrite)
   for position in positions:
     fenFile.writeLine position.fen
@@ -108,6 +130,6 @@ proc createStartPositionFile*(
 when isMainModule:
   let startPositions = getStartPositions(100_000)
 
-  for p in startPositions:
+  for p in startPositions[0..100]:
     print p
   echo startPositions.len

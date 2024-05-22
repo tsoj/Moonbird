@@ -1,4 +1,4 @@
-import ../startPositions, ../positionUtils
+import ../startPositions, ../positionUtils, ../utils
 
 import std/[osproc, os, strutils, strformat, json]
 
@@ -23,12 +23,20 @@ doAssert "not a git repository" notin gitStatus
 let
   gitHasUnstagedChanges = execProcess("git status -suno").strip != ""
   currentBranch = execProcess("git rev-parse --abbrev-ref HEAD").strip
+  otherBranch =
+    if commandLineParams().len >= 1:
+      commandLineParams()[0].strip
+    else:
+      mainBranch
+      
+echo "Testing against ", otherBranch
 
 doAssert not gitHasUnstagedChanges, "Shouldn't do SPRT with unstaged changes"
 
-if currentBranch == mainBranch:
+
+if currentBranch == otherBranch:
   while true:
-    stdout.write "You are about to test the main branch against itself. Are you sure you want to do this? [y/n] "
+    stdout.write "You are about to test a branch against itself. Are you sure you want to do this? [y/n] "
     stdout.flushFile
     let answer = readLine(stdin).strip.toLowerAscii
     if answer == "y":
@@ -42,7 +50,7 @@ proc moonbirdBinary(branch: string): string =
   fmt"{getCurrentDir()}/{workDir}Moonbird-{branch}"
 
 try:
-  for branch in [mainBranch, currentBranch]:
+  for branch in [otherBranch, currentBranch]:
     discard tryRemoveFile moonbirdBinaryFile
     if execCmd("git switch " & branch) != 0:
       raise newException(CatchableError, "Failed to switch to branch " & branch)
@@ -90,8 +98,8 @@ let cuteataxxSettings =
         "protocol": "UAI",
       },
       {
-        "name": "Moonbird-" & mainBranch,
-        "path": moonbirdBinary(mainBranch),
+        "name": "Moonbird-" & otherBranch,
+        "path": moonbirdBinary(otherBranch),
         "protocol": "UAI",
       },
     ],
