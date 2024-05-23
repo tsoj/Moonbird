@@ -76,30 +76,30 @@ proc printUaiSearchParams*() =
       " max ",
       param.max
 
-addParam(aspirationWindowStartingOffset, default = 8, min = 2, max = 100, step = 2)
+#!fmt: off
+addParam(aspirationWindowStartingOffset, default = 9, min = 2, max = 100, step = 2)
 addParam(aspirationWindowMultiplier, default = 1.9, min = 1.1, max = 10.0, step = 0.2)
 
 addParam(minMoveCounterFutility, default = 2, min = 2, max = 20, step = 2)
-addParam(futilityReductionDiv, default = 35, min = 10, max = 500, step = 10)
+addParam(futilityReductionDiv, default = 37, min = 10, max = 500, step = 10)
 
 addParam(nullMoveDepthSub, default = 4.Ply, min = 0.Ply, max = 10.Ply, step = 1.Ply)
 addParam(nullMoveDepthDiv, default = 2, min = 1, max = 15, step = 1)
 addParam(minTargetSquaresNullMovePruning, default = 11, min = 0, max = 49, step = 2)
 
-addParam(lmrDepthHalfLife, default = 47, min = 5, max = 60, step = 10)
+addParam(lmrDepthHalfLife, default = 50, min = 5, max = 60, step = 10)
 addParam(lmrDepthSub, default = 0.Ply, min = 0.Ply, max = 10.Ply, step = 1.Ply)
-addParam(minMoveCounterLmr, default = 7, min = 1, max = 15, step = 2)
+addParam(minMoveCounterLmr, default = 8, min = 1, max = 15, step = 2)
 
-addParam(iirMinDepth, default = 4.Ply, min = 0.Ply, max = 12.Ply, step = 1.Ply)
+addParam(iirMinDepth, default = 3.Ply, min = 0.Ply, max = 12.Ply, step = 1.Ply)
 
-addParam(
-  maxHistoryTableValue, default = 107000, min = 1000, max = 10000000, step = 40000
-)
+addParam(maxHistoryTableValue, default = 127000, min = 1000, max = 10000000, step = 40000)
 addParam(historyTableBadMoveDivider, default = 24.0, min = 1.0, max = 100.0, step = 8.0)
-addParam(historyTableShrinkDiv, default = 1.25, min = 1.1, max = 10.0, step = 0.5)
+addParam(historyTableShrinkDiv, default = 1.37, min = 1.1, max = 10.0, step = 0.5)
 
-addParam(historyMoveOrderingFactor, default = 2.0, min = 0.1, max = 1000.0, step = 5.0)
-addParam(doubleMoveOrderingBonus, default = -2.2, min = -10.0, max = 10.0, step = 2.0)
+addParam(historyMoveOrderingFactor, default = 3.0, min = 0.1, max = 1000.0, step = 5.0)
+addParam(doubleMoveOrderingBonus, default = -3.6, min = -10.0, max = 10.0, step = 2.0)
+#!fmt: on
 
 proc getWeatherFactoryConfig*(): string =
   result = "{"
