@@ -9,6 +9,14 @@ Moonbird is a superhuman Ataxx engine. It supports the Universal Ataxx Interface
 
 Moonbird uses the alpha-beta search algorithm with modifications such as move ordering, transposition table, nullmove pruning, principal variation search, late move and futility reductions, and aspiration windows. The evaluation function uses large tables of 4x2 and 2x4 tuples that are tuned using stochastic gradient descent.
 
+### Prerequisites
+
+You need Nim 2.0 or newer.
+You also need the threadpool library malebolgia:
+```shell
+nimble install malebolgia@1.3.2
+```
+
 ### Compiling for native CPU
 ```shell
 nim native Moonbird
