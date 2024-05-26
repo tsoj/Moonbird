@@ -63,6 +63,10 @@ data.loadData "res/data/no_gaps/trainingSet_2024-05-23-00-11-05_1000_9cc126c.bin
 data.loadData "res/data/no_gaps/trainingSet_2024-05-23-00-11-22_1000_9cc126c.bin"
 data.loadData "res/data/no_gaps/trainingSet_2024-05-23-00-12-32_1000_9cc126c.bin"
 data.loadData "res/data/no_gaps/trainingSet_2024-05-23-03-28-01_1000_9cc126c.bin"
+data.loadData "res/data/no_gaps/trainingSet_2024-05-23-23-23-48_1000_ce77dd1.bin"
+data.loadData "res/data/no_gaps/trainingSet_2024-05-23-23-22-20_1000_ce77dd1.bin"
+data.loadData "res/data/no_gaps/trainingSet_2024-05-23-23-26-01_1000_ce77dd1.bin"
+data.loadData "res/data/no_gaps/trainingSet_2024-05-23-23-26-10_1000_ce77dd1.bin"
 data.shuffle
 
 echo "Total number of entries: ", data.len
