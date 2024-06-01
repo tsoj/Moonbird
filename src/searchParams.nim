@@ -25,7 +25,7 @@ func getAsInt[T](a: T): int =
     a.int
 
 macro addParam[T](
-    name: untyped, default, min, max, step: T, tunable: bool = true
+    name: untyped, default, min, max, step: T, tunable: bool = false
 ): untyped =
   let
     varName: NimNode = getVarName(name)
@@ -77,6 +77,8 @@ proc printUaiSearchParams*() =
       param.max
 
 #!fmt: off
+addParam(simpleEvalMultiplier, default = 50.Value, min = 1.Value, max = 10000.Value, step = 10.Value, true)
+
 addParam(aspirationWindowStartingOffset, default = 9, min = 2, max = 100, step = 2)
 addParam(aspirationWindowMultiplier, default = 1.9, min = 1.1, max = 10.0, step = 0.2)
 
@@ -99,6 +101,7 @@ addParam(historyTableShrinkDiv, default = 1.37, min = 1.1, max = 10.0, step = 0.
 
 addParam(historyMoveOrderingFactor, default = 3.0, min = 0.1, max = 1000.0, step = 5.0)
 addParam(doubleMoveOrderingBonus, default = -3.6, min = -10.0, max = 10.0, step = 2.0)
+
 #!fmt: on
 
 proc getWeatherFactoryConfig*(): string =

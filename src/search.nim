@@ -25,6 +25,13 @@ type SearchState* {.requiresInit.} = object
   stopTime*: Seconds
   eval*: EvaluationFunction
 
+func doEval(state: SearchState, position: Position): Value =
+  if position.occupancy.countSetBits >= 47:
+    let us = position.us
+    return (position[us].countSetBits - position[us.opposite].countSetBits).Value * simpleEvalMultiplier()
+  state.eval(position)
+
+
 func shouldStop(state: var SearchState): bool =
   if state.countedNodes >= state.maxNodes or
       ((state.countedNodes mod 1998) == 1107 and secondsSince1970() >= state.stopTime):
@@ -94,7 +101,7 @@ func search(
     beta
 
   if depth <= 0.Ply:
-    return state.eval(position)
+    return state.doEval(position)
 
   # null move reduction
   if height > 0 and (hashResult.isEmpty or hashResult.nodeType == cutNode) and
@@ -132,7 +139,7 @@ func search(
 
     # futility reduction
     if moveCounter >= minMoveCounterFutility() and newDepth > 0:
-      newDepth -= futilityReduction(alpha + state.eval(newPosition))
+      newDepth -= futilityReduction(alpha + state.doEval(newPosition))
 
     if newDepth <= 0:
       continue
