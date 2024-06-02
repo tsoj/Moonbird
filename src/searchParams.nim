@@ -78,6 +78,7 @@ proc printUaiSearchParams*() =
 
 #!fmt: off
 addParam(simpleEvalMultiplier, default = 50.Value, min = 1.Value, max = 10000.Value, step = 10.Value, true)
+addParam(simpleEvalSquareMargin, default = 47, min = 1, max = 50, step = 2, true)
 
 addParam(aspirationWindowStartingOffset, default = 9, min = 2, max = 100, step = 2)
 addParam(aspirationWindowMultiplier, default = 1.9, min = 1.1, max = 10.0, step = 0.2)

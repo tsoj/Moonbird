@@ -26,7 +26,7 @@ type SearchState* {.requiresInit.} = object
   eval*: EvaluationFunction
 
 func doEval(state: SearchState, position: Position): Value =
-  if position.occupancy.countSetBits >= 47:
+  if position.occupancy.countSetBits >= simpleEvalSquareMargin():
     let us = position.us
     return (position[us].countSetBits - position[us.opposite].countSetBits).Value * simpleEvalMultiplier()
   state.eval(position)
