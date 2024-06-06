@@ -137,12 +137,15 @@ func search(
       newDepth = lmrDepth(newDepth, lmrMoveCounter)
       lmrMoveCounter += 1
 
+      if newDepth <= 0:
+        break
+
     # futility reduction
     if moveCounter >= minMoveCounterFutility() and newDepth > 0:
       newDepth -= futilityReduction(alpha + state.doEval(newPosition))
 
-    if newDepth <= 0:
-      continue
+      if newDepth <= 0:
+        continue
 
     # first explore with null window
     if hashResult.isEmpty or hashResult.bestMove != move or
