@@ -19,7 +19,7 @@ let
 
 if not dirExists workDir:
   doAssert execCmd(
-    "git clone \"https://github.com/tsoj/weather-factory-ataxx.git\" " & workDir
+    "git clone \"https://github.com/tsoj/weather-factory.git\" " & workDir
   ) == 0
   doAssert execCmd(
     fmt"git -C {workDir} checkout ac0f0134a0e86fc0caae046a51a9962450fed933"
